@@ -1,0 +1,51 @@
+{
+  "name": "@zaibot/react-dnd",
+  "version": "0.0.0",
+  "description": "",
+  "module": "dist/esnext/index.js",
+  "main": "dist/es5/index.js",
+  "typings": "dist/esnext/index.d.ts",
+  "scripts": {
+    "test": "echo \"Warning: no test specified\" && exit 0",
+    "clean": "rimraf dist/**/*.d.ts",
+    "watch": "npx nodemon -w src -e tsx -x \"npm run build:es5 && npm run build:esnext || exit 0\"",
+    "build": "npm run clean && npm run build:es5 && npm run build:esnext",
+    "build:es5": "tsc -p tsconfig.es5.json",
+    "build:prepack": "node build/pack.js",
+    "build:esnext": "tsc -p tsconfig.json",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csstype": "^2.5.3",
+    "react": "^16.4.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-actions": "^4.0.0-alpha.9",
+    "@storybook/addon-info": "^4.0.0-alpha.9",
+    "@storybook/addon-links": "^4.0.0-alpha.9",
+    "@storybook/addons": "^4.0.0-alpha.9",
+    "@storybook/react": "^4.0.0-alpha.9",
+    "@types/jest": "^23.1.0",
+    "@types/react": "^16.3.16",
+    "@types/react-dom": "^16.0.6",
+    "@types/storybook__addon-actions": "^3.0.3",
+    "@types/storybook__addon-info": "^3.2.3",
+    "@types/storybook__react": "^3.0.7",
+    "awesome-typescript-loader": "^5.0.0",
+    "babel-core": "^6.26.3",
+    "babel-runtime": "^6.26.0",
+    "glob": "^7.1.2",
+    "jest": "^23.1.0",
+    "minimatch": "^3.0.4",
+    "prepack": "^0.2.38",
+    "react-docgen-typescript-webpack-plugin": "^1.1.0",
+    "react-dom": "^16.4.0",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^22.4.6",
+    "typescript": "^2.9.1"
+  }
+}
