@@ -17,6 +17,12 @@
     "build-storybook": "build-storybook"
   },
   "keywords": [],
+  "files": [
+    "dist",
+    "src",
+    "tsconfig.es5.json",
+    "tsconfig.json"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
