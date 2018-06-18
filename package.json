@@ -1,6 +1,6 @@
 {
   "name": "@zaibot/react-dnd",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publishConfig": {
     "access": "public"
   },
@@ -21,8 +21,8 @@
   },
   "keywords": [],
   "files": [
-    "dist",
-    "src",
+    "dist/**",
+    "src/**",
     "tsconfig.es5.json",
     "tsconfig.json"
   ],
