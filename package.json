@@ -1,6 +1,9 @@
 {
   "name": "@zaibot/react-dnd",
   "version": "0.0.2",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "",
   "module": "dist/esnext/index.js",
   "main": "dist/es5/index.js",
