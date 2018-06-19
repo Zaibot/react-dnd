@@ -1,17 +1,16 @@
 import React from "react";
 import { PositionConsumer } from "../position-context";
-import { RefMethod, IBounds, DataKey, emptyBounds, AnyElement } from "../utils";
+import { RefMethod, IBounds, DataKey, emptyBounds, AnyElement, Omit } from "../utils";
 
-type Diff<T extends (string | number | symbol), U extends (string | number | symbol)> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
-type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;
+export interface IPositionPublisherRenderProps {
+    readonly refContainer: RefMethod;
+}
 
 export interface IPositionPublisherProps {
     readonly refContainer?: RefMethod;
-    readonly onRef: (key: DataKey, getBounds: (() => IBounds) | null) => void;
+    readonly reportRefContainer: (key: DataKey, getBounds: (() => IBounds) | null) => void;
     readonly keyData: DataKey;
-    readonly children: (props: {
-        refContainer: RefMethod,
-    }) => React.ReactNode;
+    readonly children: (props: IPositionPublisherRenderProps) => React.ReactNode;
 }
 
 class PositionPublisherImpl extends React.Component<IPositionPublisherProps> {
@@ -30,7 +29,7 @@ class PositionPublisherImpl extends React.Component<IPositionPublisherProps> {
     private onRefContainer(element: AnyElement) {
         if (this.__element !== element) {
             this.__element = element;
-            this.props.onRef(this.props.keyData, element ? this.getBounds : null);
+            this.props.reportRefContainer(this.props.keyData, element ? this.getBounds : null);
             if (this.props.refContainer) { this.props.refContainer(element); }
         }
     }
@@ -39,10 +38,26 @@ class PositionPublisherImpl extends React.Component<IPositionPublisherProps> {
         return this.__element ? this.__element.getBoundingClientRect() : emptyBounds;
     }
 }
-export const PositionPublisher = ({ children, ...props }: Omit<IPositionPublisherProps, "onRef">) => (
+
+export const PositionPublisher = ({ children, ...props }: Omit<IPositionPublisherProps, "reportRefContainer">) => (
     <PositionConsumer>
-        {({ onRef }) => (
-            <PositionPublisherImpl {...props} onRef={onRef}>{children}</PositionPublisherImpl>
+        {({ reportRefContainer }) => (
+            <PositionPublisherImpl {...props} reportRefContainer={reportRefContainer}>{children}</PositionPublisherImpl>
         )}
     </PositionConsumer>
 );
+
+type OmitRenderProps<T extends IPositionPublisherRenderProps> = Omit<T, keyof IPositionPublisherRenderProps>;
+type OmitChildren<T extends { children?: any }> = Omit<T, "children">;
+
+export const withPositionPublisher = <Props extends IPositionPublisherRenderProps>(component: React.ComponentType<Props>) => {
+    const Component: any = component;
+    return React.forwardRef((props: OmitChildren<IPositionPublisherProps> & OmitRenderProps<Props>, ref) => {
+        const { refContainer, reportRefContainer, keyData, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
+        return (
+            <PositionPublisher keyData={keyData} refContainer={refContainer}>
+                {(positionProps) => <Component {...positionProps} {...extraProps} ref={ref} />}
+            </PositionPublisher>
+        );
+    });
+};
