@@ -1,6 +1,5 @@
 import React from "react";
 import { storiesOf } from "@storybook/react";
-import { withInfo } from "@storybook/addon-info";
 import { action } from "@storybook/addon-actions";
 import { Droppable } from "../src/droppable";
 import { DraggingProvider } from "../src/dragging-provider";
@@ -8,7 +7,7 @@ import { Draggable } from "../src/draggable";
 import { DragHandle } from "../src/drag-handle";
 import { PositionContainer } from "../src/position-container";
 import { PositionPublisher } from "../src/position-publisher";
-import { closestCorner, IElement } from "../src/strategy-closest-corner";
+import { closestCorner } from "../src/strategy-closest-corner";
 
 const stories = storiesOf("react-dnd", module);
 
@@ -32,7 +31,6 @@ const orderingData = [
 ];
 
 stories
-  .addDecorator(withInfo({ inline: true, }))
   .add(`Basic`, () => (
     <DraggingProvider>
       <Droppable onDropped={action(`onDropped`)} onDropping={undefined}>
@@ -77,8 +75,8 @@ stories
   .add(`Ordering`, () => (
     <DraggingProvider>
       <PositionContainer>
-        {({ ref, registries }) => (
-          <Droppable onDropped={action(`onDropped`)} onDropping={undefined} refTracking={ref}>
+        {({ refContainer, registries }) => (
+          <Droppable onDropped={action(`onDropped`)} onDropping={undefined} refTracking={refContainer}>
             {({ isDropping, dropProps, trackingProps, droppingPosition }) => (
               <Red {...trackingProps} {...dropProps} innerRef={trackingProps.ref}>
                 {orderingData.map((item) => (
