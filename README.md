@@ -1,6 +1,8 @@
-![alt build](https://travis-ci.org/Zaibot/react-dnd.svg?branch=master)
+![build status](https://travis-ci.org/Zaibot/react-dnd.svg?branch=master)
 
 # @zaibot/react-dnd
+
+[Demo / Documentation](https://zaibot.github.io/react-dnd/)
 
 ## Usage
 

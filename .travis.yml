@@ -18,8 +18,8 @@ deploy:
   provider: pages
   local-dir: storybook-static
   skip-cleanup: true
-  github-token:
-    secure: C5veOyx5+Lziu4XMXQqa5bj7eEMCekr+xluPSQVvPHrfU9TdP3fAOBQjbouQwIfSzvMqwWYheM6QmJcdMvWR4lAFHd0bwgJTs8FMSQhtaNb7jZIbO1jHPyUYAYqQe/wQ/QI/RQXKL3odbXmTbgzv1BY9rrJn91YFW6aGgVK9OPepNj6vJsh0hJNJeM4/L+THLnjQNWWvtS9mpVQSafcjSo6Kn9pwFJvnKBc8h8+mjh/NCgqt10f2eH7/5YoAoawC/s6I78iKO/P/xFn8J2YKoWHB8XSu8A+uSj1E8vC4KSkw8zQMYLVNlbaVLkW44MxRUXnpgTmSKXo8o5rAQDHvSLv9rYfE04pmi7uGeAk2uldc1RwsDzu13r8Epr7i7OfshLj5qjkaPnKP8mtLfFJn7tNdvn22+Bdyi8CB5dyrbDh33jXbT6i6YYGknKhs0HPVOCls2eRnUVz9gxyXlXg2Jtm/1zM6WEb34EE/GqjOPc/yJ71mQGsqoLdCaBE51MTUy5IHshfSvFNalk57RkZIvKfC5bhmnQPE3eI+DLsceIXxLBSUZrW0HD4Oa93LNbFgvgq+sLq6zG+TipwJhJ2R4oHnHohKMhb+JDS/yCqddGfJa52zSnwxfEwyiKdtYPMsqcb/a2ISQu5Sj88Y5daljCS5tZmNNki/+AW33QYVpZ0=
+  github-token: $GITHUB_TOKEN
   keep-history: true
   on:
-    branch: gh-pages
+    tags: true
+    repo: Zaibot/react-dnd
