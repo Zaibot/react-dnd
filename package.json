@@ -21,8 +21,8 @@
   },
   "keywords": [],
   "files": [
-    "dist/**",
-    "src/**",
+    "dist",
+    "src",
     "tsconfig.es5.json",
     "tsconfig.json"
   ],
