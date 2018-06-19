@@ -1,20 +1,20 @@
 import React from "react";
 import { IPositionInterface, PositionProvider } from "../position-context";
-import { RefMethod, DataKey, IBounds } from "../utils";
+import { RefMethod, DataKey, IBounds, Omit } from "../utils";
 
 export interface IPositionRegistry {
     readonly key: DataKey;
     readonly getBounds: () => IBounds | null;
 }
 
-export interface IPositionChildProps {
+export interface IPositionRenderProps {
     readonly getBounds: () => IBounds | null;
     readonly registries: IPositionRegistry[];
-    readonly ref: RefMethod;
+    readonly refContainer: RefMethod;
 }
 
 export interface IPositionContainerProps {
-    readonly children: (props: IPositionChildProps) => React.ReactNode;
+    readonly children: (props: IPositionRenderProps) => React.ReactNode;
 }
 
 export interface IPositionContainerState {
@@ -32,7 +32,7 @@ export class PositionContainer extends React.Component<IPositionContainerProps, 
     public constructor(props: IPositionContainerProps, context?: any) {
         super(props, context);
 
-        this.onRef = this.onRef.bind(this);
+        this.reportRefContainer = this.reportRefContainer.bind(this);
         this.getPositions = this.getPositions.bind(this);
         this.getPosition = this.getPosition.bind(this);
         this.onContainerRef = this.onContainerRef.bind(this);
@@ -41,9 +41,9 @@ export class PositionContainer extends React.Component<IPositionContainerProps, 
 
     public render() {
         const getBounds = this.getBounds;
-        const ref = this.onContainerRef;
+        const refContainer = this.onContainerRef;
         const registries = this.state.registries;
-        const children = this.props.children({ ref, getBounds, registries });
+        const children = this.props.children({ refContainer, getBounds, registries });
         return (
             <PositionProvider value={this}>
                 {children}
@@ -51,7 +51,7 @@ export class PositionContainer extends React.Component<IPositionContainerProps, 
         );
     }
 
-    public onRef(key: DataKey, getBounds: () => IBounds | null) {
+    public reportRefContainer(key: DataKey, getBounds: () => IBounds | null) {
         if (getBounds) {
             const existing = this.__registries.find(({ key: keyItem, getBounds: getBoundsItem }) => key === keyItem && getBounds === getBoundsItem);
             if (existing) {
@@ -94,3 +94,13 @@ export class PositionContainer extends React.Component<IPositionContainerProps, 
         return this.state.element ? this.state.element.getBoundingClientRect() : null;
     }
 }
+
+export const withPositionContainer = <P extends IPositionRenderProps>(component: React.ComponentType<P>) => {
+    type Props = Omit<P, keyof IPositionRenderProps>;
+    const Component: any = component;
+    return React.forwardRef((props: Props, ref) => (
+        <PositionContainer>
+            {(positionProps) => <Component {...positionProps} {...props} ref={ref} />}
+        </PositionContainer>
+    ));
+};
