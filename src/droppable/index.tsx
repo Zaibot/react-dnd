@@ -1,7 +1,7 @@
 import * as React from "react";
 import { withDragAndDropData, IDraggingConsumer } from "../dragging-provider";
 import { RefMethod, AnyElement } from "../utils/react";
-import { DataObject, IPosition, isPositionSame } from "../utils";
+import { DataObject, IPosition, isPositionSame, Omit } from "../utils";
 
 export interface IDroppableDragProps {
     readonly onDragOver?: React.DragEventHandler<AnyElement>;
@@ -11,7 +11,7 @@ export interface IDroppableDragProps {
 export interface IDroppableTrackingProps {
     readonly ref?: RefMethod;
 }
-export interface IDroppableChildProps {
+export interface IDroppableRenderProps {
     readonly dropProps: IDroppableDragProps;
     readonly trackingProps: IDroppableTrackingProps;
     readonly isDropping: boolean;
@@ -20,7 +20,7 @@ export interface IDroppableChildProps {
 }
 export interface IDroppableProps extends IDraggingConsumer {
     readonly refTracking?: RefMethod;
-    readonly children: (args: IDroppableChildProps) => React.ReactNode;
+    readonly children: (args: IDroppableRenderProps) => React.ReactNode;
     readonly onDropping?: (args: { droppingPosition: IPosition, droppingData: DataObject }) => void;
     readonly onDropped?: (args: { droppingPosition: IPosition, droppingData: DataObject }) => void;
 }
@@ -93,3 +93,18 @@ class DroppableImpl extends React.Component<IDroppableProps, IDroppableState> {
     }
 }
 export const Droppable = withDragAndDropData(DroppableImpl);
+
+type OmitRenderProps<T extends IDroppableRenderProps> = Omit<T, keyof IDroppableRenderProps>;
+type OmitChildren<T extends { children?: any }> = Omit<T, "children">;
+
+export const withDroppable = <Props extends IDroppableRenderProps>(component: React.ComponentType<Props>) => {
+    const Component: any = component;
+    return React.forwardRef((props: OmitChildren<IDroppableProps> & OmitRenderProps<Props>, ref) => {
+        const { onDropped, onDropping, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
+        return (
+            <Droppable onDropped={onDropped} onDropping={onDropping} refTracking={refTracking}>
+                {(positionProps) => <Component {...positionProps} {...extraProps} ref={ref} />}
+            </Droppable>
+        );
+    });
+};
