@@ -203,14 +203,16 @@ export const Draggable = withDragAndDropData(DraggableImpl);
 type OmitRenderProps<T extends IDraggableRenderProps> = Omit<T, keyof IDraggableRenderProps>;
 type OmitChildren<T extends { children?: any }> = Omit<T, "children">;
 
-export const withDraggable = <Props extends IDraggableRenderProps>(component: React.ComponentType<Props>) => {
+export const withDraggable = <P extends IDraggableRenderProps>(component: React.ComponentType<P>) => {
     const Component: any = component;
-    return React.forwardRef((props: OmitChildren<IDraggableProps> & OmitRenderProps<Props>, ref) => {
-        const { dataDrag, onDragEnd, onDragMove, onDragStart, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
-        return (
-            <Draggable dataDrag={dataDrag} onDragEnd={onDragEnd} onDragMove={onDragMove} onDragStart={onDragStart} refTracking={refTracking}>
-                {(renderProps) => <Component {...renderProps} {...extraProps} ref={ref} />}
-            </Draggable>
-        );
-    });
+    const Wrapped: React.ComponentType<OmitChildren<IDraggableProps> & OmitRenderProps<P>> = React.forwardRef(
+        (props, ref) => {
+            const { dataDrag, onDragEnd, onDragMove, onDragStart, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
+            return (
+                <Draggable dataDrag={dataDrag} onDragEnd={onDragEnd} onDragMove={onDragMove} onDragStart={onDragStart} refTracking={refTracking}>
+                    {(renderProps) => <Component {...renderProps} {...extraProps} ref={ref} />}
+                </Draggable>
+            );
+        });
+    return Wrapped;
 };
