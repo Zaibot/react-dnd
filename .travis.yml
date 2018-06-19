@@ -21,5 +21,4 @@ deploy:
   github-token: $GITHUB_TOKEN
   keep-history: true
   on:
-    tags: true
-    repo: Zaibot/react-dnd
+    branch: master
