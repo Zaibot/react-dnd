@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2015",
-    "module": "amd",
+    "module": "commonjs",
     "lib": [
       "dom",
       "esnext"
@@ -11,7 +11,7 @@
     "declarationMap": false,
     "moduleResolution": "node",
     "sourceMap": true,
-    "outFile": "./dist/es5/index.js",
+    "outDir": "./dist/cjs",
     "rootDir": "./src",
     "downlevelIteration": true,
     "strict": true,
