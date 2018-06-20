@@ -39,8 +39,8 @@ class PositionPublisherImpl extends React.Component<IPositionPublisherProps> {
     }
 }
 
-export const PositionPublisher = ({ children, ...props }: Omit<IPositionPublisherProps, "reportRefContainer">) => (
-    <PositionConsumer>
+export const PositionPublisher = ({ children, refContainer, ...props }: Omit<IPositionPublisherProps, "reportRefContainer">) => (
+    <PositionConsumer >
         {({ reportRefContainer }) => (
             <PositionPublisherImpl {...props} reportRefContainer={reportRefContainer}>{children}</PositionPublisherImpl>
         )}
@@ -50,14 +50,18 @@ export const PositionPublisher = ({ children, ...props }: Omit<IPositionPublishe
 type OmitRenderProps<T extends IPositionPublisherRenderProps> = Omit<T, keyof IPositionPublisherRenderProps>;
 type OmitChildren<T extends { children?: any }> = Omit<T, "children">;
 
-export const withPositionPublisher = <Props extends IPositionPublisherRenderProps>(component: React.ComponentType<Props>) => {
+export const withPositionPublisher = <P extends IPositionPublisherRenderProps>(component: React.ComponentType<P>) => {
     const Component: any = component;
-    return React.forwardRef((props: OmitChildren<IPositionPublisherProps> & OmitRenderProps<Props>, ref) => {
-        const { refContainer, reportRefContainer, keyData, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
-        return (
-            <PositionPublisher keyData={keyData} refContainer={refContainer}>
-                {(positionProps) => <Component {...positionProps} {...extraProps} ref={ref} />}
-            </PositionPublisher>
-        );
-    });
+    const Wrapped: React.ComponentType<OmitChildren<IPositionPublisherProps> & OmitRenderProps<P>> = React.forwardRef(
+        (props, ref) => {
+            const { refContainer, reportRefContainer, keyData, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
+            return (
+                <PositionPublisher keyData={keyData} refContainer={refContainer}>
+                    {(positionProps: IPositionPublisherRenderProps) => (
+                        <Component {...positionProps} {...extraProps} ref={ref} />
+                    )}
+                </PositionPublisher>
+            );
+        });
+    return Wrapped;
 };

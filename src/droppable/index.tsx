@@ -99,12 +99,14 @@ type OmitChildren<T extends { children?: any }> = Omit<T, "children">;
 
 export const withDroppable = <Props extends IDroppableRenderProps>(component: React.ComponentType<Props>) => {
     const Component: any = component;
-    return React.forwardRef((props: OmitChildren<IDroppableProps> & OmitRenderProps<Props>, ref) => {
-        const { onDropped, onDropping, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
-        return (
-            <Droppable onDropped={onDropped} onDropping={onDropping} refTracking={refTracking}>
-                {(positionProps) => <Component {...positionProps} {...extraProps} ref={ref} />}
-            </Droppable>
-        );
-    });
+    const Wrapped: React.ComponentType<OmitChildren<IDroppableProps> & OmitRenderProps<Props>> = React.forwardRef(
+        (props, ref) => {
+            const { onDropped, onDropping, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
+            return (
+                <Droppable onDropped={onDropped} onDropping={onDropping} refTracking={refTracking}>
+                    {(positionProps) => <Component {...positionProps} {...extraProps} ref={ref} />}
+                </Droppable>
+            );
+        });
+    return Wrapped;
 };

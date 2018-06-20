@@ -95,12 +95,15 @@ export class PositionContainer extends React.Component<IPositionContainerProps, 
     }
 }
 
+type OmitRenderProps<P extends IPositionRenderProps> = Omit<P, keyof IPositionRenderProps>;
+
 export const withPositionContainer = <P extends IPositionRenderProps>(component: React.ComponentType<P>) => {
-    type Props = Omit<P, keyof IPositionRenderProps>;
     const Component: any = component;
-    return React.forwardRef((props: Props, ref) => (
-        <PositionContainer>
-            {(positionProps) => <Component {...positionProps} {...props} ref={ref} />}
-        </PositionContainer>
-    ));
+    const Wrapped: React.ComponentType<OmitRenderProps<P>> = React.forwardRef(
+        (props, ref) => (
+            <PositionContainer>
+                {(positionProps) => <Component {...positionProps} {...props} ref={ref} />}
+            </PositionContainer>
+        ));
+    return Wrapped;
 };

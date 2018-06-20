@@ -58,18 +58,21 @@ export interface IDraggingConsumer {
     onDragged: () => void;
 }
 
-export const withDragAndDropData = <T extends IDraggingConsumer>(Inner: React.ReactType<T>) => {
-    type Props = Omit<T, keyof IDraggingConsumer>;
-    return React.forwardRef((props: Props, ref) => (
-        <context.Consumer>
-            {({ draggingData, onDragged, onDragging }) => (
-                <Inner
-                    {...props}
-                    onDragging={onDragging}
-                    onDragged={onDragged}
-                    draggingData={draggingData}
-                    ref={ref} />
-            )}
-        </context.Consumer>
-    ));
+type OmitRenderProps<P extends IDraggingConsumer> = Omit<P, keyof IDraggingConsumer>;
+
+export const withDragAndDropData = <P extends IDraggingConsumer>(Inner: React.ReactType<P>) => {
+    const Wrapped: React.ComponentType<OmitRenderProps<P>> = React.forwardRef(
+        (props, ref) => (
+            <context.Consumer>
+                {({ draggingData, onDragged, onDragging }) => (
+                    <Inner
+                        {...props}
+                        onDragging={onDragging}
+                        onDragged={onDragged}
+                        draggingData={draggingData}
+                        ref={ref} />
+                )}
+            </context.Consumer>
+        ));
+    return Wrapped;
 };
