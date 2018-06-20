@@ -1,20 +1,19 @@
 {
   "name": "@zaibot/react-dnd",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "publishConfig": {
     "access": "public"
   },
   "description": "",
   "module": "dist/esnext/index.js",
-  "main": "dist/es5/index.js",
+  "main": "dist/cjs/index.js",
   "typings": "dist/esnext/index.d.ts",
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0",
-    "clean": "rimraf dist/**/*.d.ts",
-    "watch": "npx nodemon -w src -e tsx -x \"npm run build:es5 && npm run build:esnext || exit 0\"",
-    "build": "npm run clean && npm run build:es5 && npm run build:esnext",
-    "build:es5": "tsc -p tsconfig.es5.json",
-    "build:prepack": "node build/pack.js",
+    "clean": "rimraf dist",
+    "watch": "npx nodemon -w src -e tsx -x \"npm run build:cjs && npm run build:esnext || exit 0\"",
+    "build": "npm run clean && npm run build:cjs && npm run build:esnext",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esnext": "tsc -p tsconfig.json",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
@@ -23,7 +22,7 @@
   "files": [
     "dist",
     "src",
-    "tsconfig.es5.json",
+    "tsconfig.cjs.json",
     "tsconfig.json"
   ],
   "author": "",
