@@ -1,6 +1,6 @@
 import React from "react";
 import { IPositionInterface, PositionProvider } from "../position-context";
-import { RefMethod, DataKey, IBounds, Omit } from "../utils";
+import { RefMethod, DataKey, IBounds, Minus } from "../utils";
 
 export interface IPositionRegistry {
     readonly key: DataKey;
@@ -95,7 +95,7 @@ export class PositionContainer extends React.Component<IPositionContainerProps, 
     }
 }
 
-type OmitRenderProps<P extends IPositionRenderProps> = Omit<P, keyof IPositionRenderProps>;
+type OmitRenderProps<T> = Minus<T, IPositionRenderProps>;
 
 export const withPositionContainer = <P extends IPositionRenderProps>(component: React.ComponentType<P>) => {
     const Component: any = component;

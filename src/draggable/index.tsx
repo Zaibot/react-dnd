@@ -1,6 +1,6 @@
 import React from "react";
 import { withDragAndDropData, IDraggingConsumer } from "../dragging-provider";
-import { IPosition, RefMethod, IBounds, DataObject, isPositionSame, AnyElement, Omit } from "../utils";
+import { IPosition, RefMethod, IBounds, DataObject, isPositionSame, AnyElement, Minus } from "../utils";
 
 let emptyImage: HTMLImageElement | undefined;
 function getEmptyImage(): HTMLImageElement {
@@ -200,8 +200,8 @@ class DraggableImpl extends React.Component<IDraggableProps, IDraggableState> {
 }
 export const Draggable = withDragAndDropData(DraggableImpl);
 
-type OmitRenderProps<T extends IDraggableRenderProps> = Omit<T, keyof IDraggableRenderProps>;
-type OmitChildren<T extends { children?: any }> = Omit<T, "children">;
+type OmitRenderProps<T extends IDraggableRenderProps> = Minus<T, IDraggableRenderProps>;
+type OmitChildren<T> = Minus<T, { children?: any }>;
 
 export const withDraggable = <P extends IDraggableRenderProps>(component: React.ComponentType<P>) => {
     const Component: any = component;
