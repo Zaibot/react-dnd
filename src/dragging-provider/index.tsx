@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DataObject, Omit } from "../utils";
+import { DataObject, Minus } from "../utils";
 
 export interface IDraggingInterface {
     readonly draggingData: DataObject;
@@ -58,7 +58,7 @@ export interface IDraggingConsumer {
     onDragged: () => void;
 }
 
-type OmitRenderProps<P extends IDraggingConsumer> = Omit<P, keyof IDraggingConsumer>;
+type OmitRenderProps<P> = Minus<P, IDraggingConsumer>;
 
 export const withDragAndDropData = <P extends IDraggingConsumer>(Inner: React.ReactType<P>) => {
     const Wrapped: React.ComponentType<OmitRenderProps<P>> = React.forwardRef(

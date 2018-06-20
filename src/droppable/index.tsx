@@ -1,7 +1,7 @@
 import * as React from "react";
 import { withDragAndDropData, IDraggingConsumer } from "../dragging-provider";
 import { RefMethod, AnyElement } from "../utils/react";
-import { DataObject, IPosition, isPositionSame, Omit } from "../utils";
+import { DataObject, IPosition, isPositionSame, Minus } from "../utils";
 
 export interface IDroppableDragProps {
     readonly onDragOver?: React.DragEventHandler<AnyElement>;
@@ -94,8 +94,8 @@ class DroppableImpl extends React.Component<IDroppableProps, IDroppableState> {
 }
 export const Droppable = withDragAndDropData(DroppableImpl);
 
-type OmitRenderProps<T extends IDroppableRenderProps> = Omit<T, keyof IDroppableRenderProps>;
-type OmitChildren<T extends { children?: any }> = Omit<T, "children">;
+type OmitRenderProps<T> = Minus<T, IDroppableRenderProps>;
+type OmitChildren<T> = Minus<T, { children?: any }>;
 
 export const withDroppable = <Props extends IDroppableRenderProps>(component: React.ComponentType<Props>) => {
     const Component: any = component;
