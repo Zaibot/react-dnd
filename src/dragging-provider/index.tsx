@@ -3,11 +3,13 @@ import { DataObject, Minus } from "../utils";
 
 export interface IDraggingInterface {
     readonly draggingData: DataObject;
+    readonly draggingMeta: DataObject;
     readonly onDragging: (data: DataObject) => void;
     readonly onDragged: () => void;
 }
 
 const context = React.createContext<IDraggingInterface>({
+    draggingMeta: null,
     draggingData: null,
     onDragging() {
         console.warn(`[@zaibot/react-dnd] missing DraggingProvider`);
@@ -29,6 +31,7 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
         this.onDragged = this.onDragged.bind(this);
         this.state = {
             draggingData: null,
+            draggingMeta: null,
             onDragging: this.onDragging,
             onDragged: this.onDragged,
         }
@@ -42,9 +45,9 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
         );
     }
 
-    private onDragging(draggingData: any) {
+    private onDragging({ data, meta }: { data: DataObject, meta: DataObject }) {
         // console.log(`DraggingProvider.setState: onDragging`, data);
-        this.setState({ draggingData });
+        this.setState({ draggingData: data, draggingMeta: meta });
     }
     private onDragged() {
         // console.log(`DraggingProvider.setState: onDragged`);
@@ -54,7 +57,8 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
 
 export interface IDraggingConsumer {
     draggingData: DataObject;
-    onDragging: (data: DataObject) => void;
+    draggingMeta: DataObject;
+    onDragging: (args: { data: DataObject, meta: DataObject }) => void;
     onDragged: () => void;
 }
 
@@ -64,12 +68,13 @@ export const withDragAndDropData = <P extends IDraggingConsumer>(Inner: React.Re
     const Wrapped: React.ComponentType<OmitRenderProps<P>> = React.forwardRef(
         (props, ref) => (
             <context.Consumer>
-                {({ draggingData, onDragged, onDragging }) => (
+                {({ draggingData, draggingMeta, onDragged, onDragging }) => (
                     <Inner
                         {...props}
                         onDragging={onDragging}
                         onDragged={onDragged}
                         draggingData={draggingData}
+                        draggingMeta={draggingMeta}
                         ref={ref} />
                 )}
             </context.Consumer>
