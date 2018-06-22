@@ -16,16 +16,20 @@ export interface IDroppableRenderProps {
     readonly trackingProps: IDroppableTrackingProps;
     readonly isDropping: boolean;
     readonly droppingData: DataObject;
+    readonly droppingMeta: DataObject;
     readonly droppingPosition: IPosition | null;
 }
 export interface IDroppableProps extends IDraggingConsumer {
     readonly refTracking?: RefMethod;
     readonly children: (args: IDroppableRenderProps) => React.ReactNode;
-    readonly onDropping?: (args: { droppingPosition: IPosition, droppingData: DataObject }) => void;
-    readonly onDropped?: (args: { droppingPosition: IPosition, droppingData: DataObject }) => void;
+    readonly onDragOver?: (args: { droppingPosition: IPosition, droppingData: DataObject, droppingMeta: DataObject }) => void;
+    readonly onDragMove?: (args: { droppingPosition: IPosition, droppingData: DataObject, droppingMeta: DataObject }) => void;
+    readonly onDragOut?: (args: { droppingPosition: IPosition | null, droppingData: DataObject, droppingMeta: DataObject }) => void;
+    readonly onDrop?: (args: { droppingPosition: IPosition, droppingData: DataObject, droppingMeta: DataObject }) => void;
 }
 export interface IDroppableState {
     readonly droppingData: DataObject;
+    readonly droppingMeta: DataObject;
     readonly droppingPosition: IPosition | null;
 }
 class DroppableImpl extends React.Component<IDroppableProps, IDroppableState> {
@@ -42,11 +46,12 @@ class DroppableImpl extends React.Component<IDroppableProps, IDroppableState> {
 
     public state: IDroppableState = {
         droppingData: null,
+        droppingMeta: null,
         droppingPosition: null,
     }
 
     public render() {
-        const { droppingData, droppingPosition } = this.state;
+        const { droppingData, droppingPosition, droppingMeta } = this.state;
         const isDropping = !!this.state.droppingData;
         const dropProps = this.dropProps;
         const trackingProps = {
@@ -58,38 +63,70 @@ class DroppableImpl extends React.Component<IDroppableProps, IDroppableState> {
             isDropping,
             droppingData,
             droppingPosition,
+            droppingMeta,
         });
         return children;
     }
 
     private onDragOver(e: React.DragEvent<AnyElement>) {
-        const droppingData = this.props.draggingData;
-        const droppingPosition = { left: e.clientX, top: e.clientY };
-        if (this.state.droppingData !== droppingData || !isPositionSame(this.state.droppingPosition, droppingPosition)) {
-            this.setState({ droppingData, droppingPosition });
-            if (this.props.onDropping) {
-                this.props.onDropping({ droppingPosition, droppingData });
-            }
-        }
         e.preventDefault();
+
+        const droppingData = this.props.draggingData;
+        const droppingMeta = this.props.draggingMeta;
+        const droppingPosition = { left: e.clientX, top: e.clientY };
+        const shouldUpdate =
+            this.state.droppingData !== droppingData
+            || this.state.droppingMeta !== droppingMeta
+            || !isPositionSame(this.state.droppingPosition, droppingPosition);
+        if (shouldUpdate) {
+            if (this.state.droppingData) {
+                this.emitDragMove({ droppingPosition, droppingData, droppingMeta });
+            } else {
+                this.emitDragOver({ droppingPosition, droppingData, droppingMeta });
+            }
+            this.setState({ droppingData, droppingPosition, droppingMeta });
+        }
+    }
+
+    private emitDragOver(args: { droppingPosition: IPosition, droppingData: DataObject, droppingMeta: DataObject }) {
+        if (this.props.onDragOver) {
+            this.props.onDragOver(args);
+        }
+    }
+    private emitDragOut(args: { droppingPosition: IPosition | null, droppingData: DataObject, droppingMeta: DataObject }) {
+        if (this.props.onDragOut) {
+            this.props.onDragOut(args);
+        }
+    }
+    private emitDragMove(args: { droppingPosition: IPosition, droppingData: DataObject, droppingMeta: DataObject }) {
+        if (this.props.onDragMove) {
+            this.props.onDragMove(args);
+        }
+    }
+    private emitDrop(args: { droppingPosition: IPosition, droppingData: DataObject, droppingMeta: DataObject }) {
+        if (this.props.onDrop) {
+            this.props.onDrop(args);
+        }
     }
 
     private onDragLeave(e: React.DragEvent<AnyElement>) {
-        // console.log(`DroppableImpl.setState: onDragLeave`);
-        this.setState({ droppingData: null, droppingPosition: null });
         e.preventDefault();
-        // TODO: notify drop cancelled
+
+        const droppingData = this.state.droppingData;
+        const droppingMeta = this.state.droppingMeta;
+        const droppingPosition = this.state.droppingPosition;
+        this.emitDragOut({ droppingPosition, droppingData, droppingMeta });
+        this.setState({ droppingData: null, droppingPosition: null });
     }
 
     private onDrop(e: React.DragEvent<AnyElement>) {
-        // console.log(`DroppableImpl.setState: onDrop`);
-        const droppingData = this.props.draggingData;
-        const droppingPosition = { left: e.clientX, top: e.clientY };
-        this.setState({ droppingData: null, droppingPosition: null });
-        if (this.props.onDropped) {
-            this.props.onDropped({ droppingPosition, droppingData });
-        }
         e.preventDefault();
+
+        const droppingData = this.props.draggingData;
+        const droppingMeta = this.props.draggingMeta;
+        const droppingPosition = { left: e.clientX, top: e.clientY };
+        this.emitDrop({ droppingPosition, droppingData, droppingMeta });
+        this.setState({ droppingData: null, droppingPosition: null });
     }
 }
 export const Droppable = withDragAndDropData(DroppableImpl);
@@ -101,9 +138,14 @@ export const withDroppable = <Props extends IDroppableRenderProps>(component: Re
     const Component: any = component;
     const Wrapped: React.ComponentType<OmitChildren<IDroppableProps> & OmitRenderProps<Props>> = React.forwardRef(
         (props, ref) => {
-            const { onDropped, onDropping, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
+            const { onDrop, onDragOver, onDragOut, onDragMove, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
             return (
-                <Droppable onDropped={onDropped} onDropping={onDropping} refTracking={refTracking}>
+                <Droppable
+                    onDrop={onDrop}
+                    onDragOver={onDragOver}
+                    onDragOut={onDragOut}
+                    onDragMove={onDragMove}
+                    refTracking={refTracking}>
                     {(positionProps) => <Component {...positionProps} {...extraProps} ref={ref} />}
                 </Droppable>
             );

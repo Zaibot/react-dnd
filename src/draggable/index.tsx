@@ -34,11 +34,15 @@ export interface IDraggableRenderProps {
 }
 export interface IDraggableProps extends IDraggingConsumer {
     readonly refTracking?: RefMethod;
-    readonly dataDrag: DataObject;
+    readonly dataKey: DataObject;
+    readonly dataDrag?: DataObject;
+    readonly dataMeta?: DataObject;
     readonly children: (args: IDraggableRenderProps) => React.ReactNode;
-    readonly onDragStart?: () => void;
-    readonly onDragMove?: () => void;
+    readonly onDragData?: (args: { dataKey: DataObject, dataDrag: DataObject }) => DataObject;
     readonly onDragEnd?: () => void;
+    readonly onDragMeta?: (args: { dataKey: DataObject, dataDrag: DataObject }) => DataObject;
+    readonly onDragMove?: () => void;
+    readonly onDragStart?: () => void;
 }
 export interface IDraggableState {
     readonly isDragging: boolean;
@@ -153,10 +157,21 @@ class DraggableImpl extends React.Component<IDraggableProps, IDraggableState> {
         const bounds = this.getBounds();
         if (!bounds) { console.warn(`[@zaibot/react-dnd] missing static bounds`); return; }
 
+        // Offer a chance to update/generate data
+        const data = this.props.onDragData
+            ? this.props.onDragData({ dataDrag: this.props.dataDrag, dataKey: this.props.dataKey })
+            : this.props.dataDrag;
+        const meta = this.props.onDragMeta
+            ? this.props.onDragMeta({ dataDrag: data, dataKey: this.props.dataKey })
+            : this.props.dataMeta;
+
+        // HTML5 dragging
         e.dataTransfer.setDragImage(getEmptyImage(), 0, 0);
         // TODO: implementation for setData
         e.dataTransfer.effectAllowed = 'move';
+        e.stopPropagation();
 
+        // React dragging clone
         const isDragging = true;
         const offsetWithinElement = {
             left: e.clientX - bounds.left,
@@ -166,13 +181,13 @@ class DraggableImpl extends React.Component<IDraggableProps, IDraggableState> {
             left: e.clientX - offsetWithinElement!.left,
             top: e.clientY - offsetWithinElement!.top,
         };
+
         // HACK: Chrome bug, calling dragend; insert small gap before modifying dom
         setImmediate(() => {
             // console.log(`Draggable.setState: onDragStart`);
             this.setState({ isDragging, offsetWithinElement, offsetWithinViewport });
-            this.props.onDragging(this.props.dataDrag);
+            this.props.onDragging({ meta, data });
         });
-        e.stopPropagation();
     }
 
     private onDrag(e: React.DragEvent<HTMLElement>) {
@@ -191,6 +206,7 @@ class DraggableImpl extends React.Component<IDraggableProps, IDraggableState> {
         }
         e.stopPropagation();
     }
+
     private onDragEnd(e: React.DragEvent<HTMLElement>) {
         // console.log(`Draggable.setState: onDragEnd`);
         this.setState({ isDragging: false });
@@ -207,9 +223,27 @@ export const withDraggable = <P extends IDraggableRenderProps>(component: React.
     const Component: any = component;
     const Wrapped: React.ComponentType<OmitChildren<IDraggableProps> & OmitRenderProps<P>> = React.forwardRef(
         (props, ref) => {
-            const { dataDrag, onDragEnd, onDragMove, onDragStart, refTracking, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
+            const {
+                dataDrag,
+                dataKey,
+                dataMeta,
+                onDrag,
+                onDragEnd,
+                onDragMove,
+                onDragStart,
+                refTracking,
+                ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
             return (
-                <Draggable dataDrag={dataDrag} onDragEnd={onDragEnd} onDragMove={onDragMove} onDragStart={onDragStart} refTracking={refTracking}>
+                <Draggable
+                    dataDrag={dataDrag}
+                    dataKey={dataKey}
+                    dataMeta={dataMeta}
+                    onDragData={dataDrag}
+                    onDragEnd={onDragEnd}
+                    onDragMeta={dataDrag}
+                    onDragMove={onDragMove}
+                    onDragStart={onDragStart}
+                    refTracking={refTracking}>
                     {(renderProps) => <Component {...renderProps} {...extraProps} ref={ref} />}
                 </Draggable>
             );
