@@ -1,6 +1,6 @@
 {
   "name": "@zaibot/react-dnd",
-  "version": "0.0.12",
+  "version": "0.0.16",
   "publishConfig": {
     "access": "public"
   },
@@ -10,6 +10,7 @@
   "typings": "dist/esnext/index.d.ts",
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0",
+    "prepare": "npm run build",
     "clean": "rimraf dist",
     "watch": "npx nodemon -w src -e tsx -x \"npm run build:cjs && npm run build:esnext || exit 0\"",
     "build": "npm run clean && npm run build:cjs && npm run build:esnext",

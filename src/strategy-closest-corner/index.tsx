@@ -7,3 +7,5 @@ export const closestCorner = {
     horizontal,
     all,
 };
+export * from './all';
+export * from './data';

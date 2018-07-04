@@ -9,6 +9,7 @@
     "jsx": "react",
     "declaration": true,
     "declarationMap": true,
+    "experimentalDecorators": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./dist/esnext",

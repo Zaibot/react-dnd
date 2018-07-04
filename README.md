@@ -4,6 +4,22 @@
 
 [Demo / Documentation](https://zaibot.github.io/react-dnd/)
 
+## Terminology
+
+| Name | Meaning |
+| - | - |
+| Draggable | Container used for cloned image |
+| Dragging | Cloned image |
+| Drag Container Props | Positioning props for cloned image |
+| Drag Handle Props | Event props for drag handle |
+| Drop Props | Event props for dropping container |
+| Tracking | Container used for calculating positioning |
+| Container | HTML element of/wrapping your content |
+| Handle | Specific actionable part within a draggable |
+| Key | Information used to identify the information to be dragged |
+| Data | The data object to be received during a drop |
+| Meta | Additional information related to action of dragging |
+
 ## Usage
 
 Required root for information sharing

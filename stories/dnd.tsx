@@ -2,26 +2,22 @@ import React from "react";
 import { storiesOf } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
 import { Droppable } from "../src/droppable";
-import { DraggingProvider } from "../src/dragging-provider";
-import { Draggable } from "../src/draggable";
+import { DragLayer } from "../src/drag-layer";
+import { Measure } from "../src/measure";
 import { DragHandle } from "../src/drag-handle";
-import { PositionContainer } from "../src/position-container";
-import { PositionPublisher } from "../src/position-publisher";
 import { closestCorner } from "../src/strategy-closest-corner";
+import { DraggableContext, DraggingProvider } from "../src/core";
 
-const stories = storiesOf("react-dnd", module);
+const stories = storiesOf("react-dnd/Drag&Drop", module);
 
-const Red = ({ innerRef, ...props }: React.HTMLProps<HTMLDivElement> & { innerRef: any }) => <div
+const Red = ({ ...props }: React.HTMLProps<HTMLDivElement>) => <div
   {...props}
-  ref={innerRef}
   style={{ ...props.style, background: `#fcc`, display: `inline-block`, padding: `2rem` }} />;
-const Blue = ({ innerRef, ...props }: React.HTMLProps<HTMLDivElement> & { innerRef: any }) => <div
+const Blue = ({ ...props }: React.HTMLProps<HTMLDivElement>) => <div
   {...props}
-  ref={innerRef}
   style={{ ...props.style, background: `#aaf`, display: `inline-block`, padding: `2rem`, opacity: 3 / 4 }} />;
-const Yellow = ({ innerRef, ...props }: React.HTMLProps<HTMLDivElement> & { innerRef: any }) => <div
+const Yellow = ({ ...props }: React.HTMLProps<HTMLDivElement>) => <div
   {...props}
-  ref={innerRef}
   style={{ ...props.style, background: `#ffa`, display: `inline-block`, padding: `2rem` }} />;
 
 const orderingData = [
@@ -33,56 +29,54 @@ const orderingData = [
 stories
   .add(`Basic`, () => (
     <DraggingProvider>
-      <Droppable onDropped={action(`onDropped`)} onDropping={undefined}>
+      <Droppable onDrop={action(`onDrop`)} onDragOver={action(`onDragOver`)} onDragOut={action(`onDragOut`)}>
         {({ isDropping, dropProps, trackingProps }) => (
-          <Red {...trackingProps} {...dropProps} innerRef={trackingProps.ref}>
+          <Red {...trackingProps} {...dropProps}>
             {isDropping ? "Dropping!" : "Waiting..."}
           </Red>
         )}
       </Droppable>
-      <Draggable dataDrag={1} onDragEnd={action(`onDragEnd`)} onDragMove={undefined} onDragStart={action(`onDragStart`)}>
-        {({ isDragging, isDragged, dragContainerProps, dragHandleProps, trackingProps: { ref }, dragging }) => (
-          isDragged
-            ? <Blue {...dragContainerProps} {...dragHandleProps} innerRef={ref}>Being dragged</Blue>
-            : isDragging
-              ? <Yellow {...dragContainerProps} {...dragHandleProps} innerRef={ref}>{dragging}Dragging me</Yellow>
-              : <Yellow {...dragContainerProps} {...dragHandleProps} innerRef={ref}>{dragging}Drag me</Yellow>
-
-        )}
-      </Draggable>
+      <DraggableContext dataKey={1} onDragEnd={action(`onDragEnd`)} onDragStart={action(`onDragStart`)}>
+        <DragLayer>
+          <Blue>Being dragged</Blue>
+        </DragLayer>
+        <Measure>
+          <DragHandle><Yellow>Dragging me</Yellow></DragHandle>
+        </Measure>
+      </DraggableContext>
     </DraggingProvider>
   ))
   .add(`Handle`, () => (
     <DraggingProvider>
-      <Droppable onDropped={action(`onDropped`)} onDropping={undefined}>
+      <Droppable onDrop={action(`onDrop`)} onDragOver={action(`onDragOver`)} onDragOut={action(`onDragOut`)}>
         {({ isDropping, dropProps, trackingProps }) => (
-          <Red {...trackingProps} {...dropProps} innerRef={trackingProps.ref}>
+          <Red {...trackingProps} {...dropProps}>
             {isDropping ? "Dropping!" : "Waiting..."}
           </Red>
         )}
       </Droppable>
-      <Draggable dataDrag={1} onDragEnd={action(`onDragEnd`)} onDragMove={undefined} onDragStart={action(`onDragStart`)}>
-        {({ isDragging, isDragged, dragContainerProps, dragHandleProps, trackingProps: { ref }, dragging }) => (
-          isDragged
-            ? <Blue {...dragContainerProps} innerRef={ref}><DragHandle dragHandleProps={dragHandleProps}>Handle</DragHandle> Being dragged</Blue>
-            : isDragging
-              ? <Yellow {...dragContainerProps} innerRef={ref}>{dragging}<DragHandle dragHandleProps={dragHandleProps}>Handle</DragHandle> Dragging me</Yellow>
-              : <Yellow {...dragContainerProps} innerRef={ref}>{dragging}<DragHandle dragHandleProps={dragHandleProps}>Handle</DragHandle> Drag me</Yellow>
-        )}
-      </Draggable>
+      <DraggableContext dataKey={1} onDragEnd={action(`onDragEnd`)} onDragStart={action(`onDragStart`)}>
+        <DragLayer>
+          <Blue><DragHandle>Handle</DragHandle> Being dragged</Blue>
+        </DragLayer>
+        <Measure>
+          <Yellow><DragHandle>Handle</DragHandle> Dragging me</Yellow>
+        </Measure>
+        {/* : <Yellow {...dragContainerProps} innerRef={ref}>{dragging}<DragHandle>Handle</DragHandle> Drag me</Yellow> */}
+      </DraggableContext>
     </DraggingProvider>
   ))
   .add(`Ordering`, () => (
     <DraggingProvider>
-      <PositionContainer>
+      {/* <PositionContainer>
         {({ refContainer, registries }) => (
-          <Droppable onDropped={action(`onDropped`)} onDropping={undefined} refTracking={refContainer}>
+          <Droppable onDrop={action(`onDrop`)} onDragOver={action(`onDragOver`)} onDragOut={action(`onDragOut`)} refTracking={refContainer}>
             {({ isDropping, dropProps, trackingProps, droppingPosition }) => (
               <Red {...trackingProps} {...dropProps} innerRef={trackingProps.ref}>
                 {orderingData.map((item) => (
                   <PositionPublisher keyData={item}>
                     {({ refContainer }) => (
-                      <Draggable dataDrag={item} onDragEnd={action(`onDragEnd`)} onDragMove={undefined} onDragStart={action(`onDragStart`)} refTracking={refContainer}>
+                      <Draggable dataKey={item} onDragEnd={action(`onDragEnd`)} onDragMove={undefined} onDragStart={action(`onDragStart`)} refTracking={refContainer}>
                         {({ isDragged, dragContainerProps, dragHandleProps, trackingProps, dragging }) => (
                           isDragged
                             ? <Blue {...dragContainerProps} {...dragHandleProps} innerRef={trackingProps.ref}>{dragging}{item.text}</Blue>
@@ -113,6 +107,6 @@ stories
             )}
           </Droppable>
         )}
-      </PositionContainer>
+      </PositionContainer> */}
     </DraggingProvider>
   ));

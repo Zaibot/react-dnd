@@ -1,11 +1,12 @@
 import * as React from "react";
-import { DataObject, Minus } from "../utils";
+import { DataObject } from "../../utils";
+import { Minus } from "../../internal";
 
 export interface IDraggingInterface {
-    readonly draggingData: DataObject;
-    readonly draggingMeta: DataObject;
-    readonly onDragging: (data: DataObject) => void;
-    readonly onDragged: () => void;
+    draggingData: DataObject;
+    draggingMeta: DataObject;
+    onDragging: (args: { data: DataObject, meta: DataObject }) => void;
+    onDragged: () => void;
 }
 
 const context = React.createContext<IDraggingInterface>({
@@ -18,6 +19,13 @@ const context = React.createContext<IDraggingInterface>({
         console.warn(`[@zaibot/react-dnd] missing DraggingProvider`);
     },
 });
+
+export interface IDraggingProviderRenderProps {
+    draggingData: DataObject;
+    draggingMeta: DataObject;
+    onDragging: (args: { data: DataObject, meta: DataObject }) => void;
+    onDragged: () => void;
+}
 
 export interface IDraggingProviderProps {
     readonly children: React.ReactNode;
@@ -38,33 +46,20 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
     }
 
     public render() {
-        return (
-            <context.Provider value={this.state}>
-                {this.props.children}
-            </context.Provider>
-        );
+        return (<context.Provider value={this.state}>{this.props.children}</context.Provider>);
     }
 
     private onDragging({ data, meta }: { data: DataObject, meta: DataObject }) {
-        // console.log(`DraggingProvider.setState: onDragging`, data);
         this.setState({ draggingData: data, draggingMeta: meta });
     }
     private onDragged() {
-        // console.log(`DraggingProvider.setState: onDragged`);
-        this.setState({ draggingData: null });
+        this.setState({ draggingData: null, draggingMeta: null });
     }
 }
 
-export interface IDraggingConsumer {
-    draggingData: DataObject;
-    draggingMeta: DataObject;
-    onDragging: (args: { data: DataObject, meta: DataObject }) => void;
-    onDragged: () => void;
-}
+type OmitRenderProps<P> = Minus<P, IDraggingProviderRenderProps>;
 
-type OmitRenderProps<P> = Minus<P, IDraggingConsumer>;
-
-export const withDragAndDropData = <P extends IDraggingConsumer>(Inner: React.ReactType<P>) => {
+export const withDragAndDropData = <P extends IDraggingProviderRenderProps>(Inner: React.ReactType<P>) => {
     const Wrapped: React.ComponentType<OmitRenderProps<P>> = React.forwardRef(
         (props, ref) => (
             <context.Consumer>

@@ -1,5 +1,6 @@
 import { IBounds, IPosition } from "../utils";
-import { pDistance, IClosestCornerElement, IClosestCornerResult } from "./utils";
+import { pDistance } from "./utils";
+import { IClosestCornerElement, IClosestCornerResult } from "./data";
 
 const calcDistanceLeft = (position: IPosition, bounds: IBounds) => pDistance(
     position.left,
