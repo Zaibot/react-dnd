@@ -3,12 +3,12 @@ import { storiesOf } from "@storybook/react";
 import { IDroppableRenderProps, withDroppable } from "../src/droppable";
 import { DragHandle } from "../src/drag-handle";
 import { DraggableContext, DraggingProvider } from "../src/core";
+import { withMeasureCustom, IMeasureCustomRenderProps } from "../src/measure-custom";
 import { action } from "@storybook/addon-actions";
 import { DataObject, IPosition, DataKey, IBounds, isBoundsSame, emptyBounds } from "../src/utils";
 import { DragLayer } from "../src/drag-layer";
 import { closestCorner } from "../src/strategy-closest-corner";
 import { ClosestCornerLocation } from "../src/strategy-closest-corner/all";
-import { withContentRect, MeasuredComponentProps } from 'react-measure';
 
 const stories = storiesOf("react-dnd/Designer", module);
 
@@ -67,9 +67,9 @@ const withDesignerLocationConsumer = <T extends {}>(Component: DesignerComponent
 }
 const not = <T extends {}>(fn: (arg: T) => boolean) => (arg: T): boolean => !fn(arg);
 const isKey = (key: DataKey) => (arg: IDesignerPosition) => key === arg.key;
-const Container = withContentRect(`client`)<IContainerProps>(withDroppable(
-  class Impl extends React.Component<IContainerProps & MeasuredComponentProps & IDroppableRenderProps, IContainerState> {
-    public static getDerivedStateFromProps(nextProps: IContainerProps & MeasuredComponentProps & IDroppableRenderProps, prevState: IContainerState) {
+const Container = withMeasureCustom<IContainerProps>(withDroppable(
+  class Impl extends React.Component<IContainerProps & IMeasureCustomRenderProps & IDroppableRenderProps, IContainerState> {
+    public static getDerivedStateFromProps(nextProps: IContainerProps & IMeasureCustomRenderProps & IDroppableRenderProps, prevState: IContainerState) {
       if (nextProps.draggingPosition !== prevState.draggingPosition) {
         if (nextProps.draggingPosition) {
           const highlight = prevState.designerLocation.positions
@@ -88,7 +88,7 @@ const Container = withContentRect(`client`)<IContainerProps>(withDroppable(
       return null;
     }
 
-    constructor(props: IContainerProps & MeasuredComponentProps & IDroppableRenderProps, context?: any) {
+    constructor(props: IContainerProps & IMeasureCustomRenderProps & IDroppableRenderProps, context?: any) {
       super(props, context);
       this.state = {
         draggingPosition: null,
@@ -102,11 +102,11 @@ const Container = withContentRect(`client`)<IContainerProps>(withDroppable(
     }
 
     public render() {
-      const { measureRef, children } = this.props;
+      const { refMeasure, children } = this.props;
       const { highlight, designerLocation } = this.state;
       return (
         <DesignerLocationProvider value={designerLocation}>
-          <div ref={measureRef}>
+          <div ref={refMeasure}>
             <div>
               {highlight ? `${highlight.key}:${locationToString(highlight.location)}` : `-`}
             </div>
@@ -168,23 +168,22 @@ const Droppable = withDroppable(
 interface IDesignerDraggableProps {
   readonly keyData: DataObject;
 }
-const DesignerDraggable = withContentRect(`bounds`)<IDesignerDraggableProps>(withDesignerLocationConsumer(
-  class Impl extends React.Component<IDesignerDraggableProps & MeasuredComponentProps & IDesignerLocation> {
+const DesignerDraggable = withMeasureCustom<IDesignerDraggableProps>(withDesignerLocationConsumer(
+  class Impl extends React.Component<IDesignerDraggableProps & IMeasureCustomRenderProps & IDesignerLocation> {
     public componentDidUpdate() {
       const key = this.props.keyData;
-      const bounds = this.props.contentRect.bounds;
+      const bounds = this.props.bounds;
       this.props.measured({ key, bounds });
     }
 
     public render() {
-      const { keyData, children, contentRect } = this.props;
-      const bounds = contentRect.bounds || emptyBounds;
+      const { keyData, children, bounds, refMeasure } = this.props;
       return (
-        <DraggableContext dataKey={keyData} bounds={this.props.contentRect.bounds}>
+        <DraggableContext dataKey={keyData} bounds={bounds}>
           <DragLayer width={bounds.width} height={bounds.height}>
             {children}
           </DragLayer>
-          <DragHandle innerRef={this.props.measureRef}>
+          <DragHandle innerRef={refMeasure}>
             {children}
           </DragHandle>
         </DraggableContext>
