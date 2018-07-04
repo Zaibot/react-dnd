@@ -1,5 +1,3 @@
-import { IBounds, DataKey } from "../utils";
-
 export const pDistance = (x: number, y: number, x1: number, y1: number, x2: number, y2: number) => {
     const A = x - x1;
     const B = y - y1;
@@ -27,14 +25,8 @@ export const pDistance = (x: number, y: number, x1: number, y1: number, x2: numb
     return Math.sqrt(dx * dx + dy * dy);
 };
 
-export interface IClosestCornerElement {
-    readonly key: DataKey;
-    readonly bounds: IBounds;
-}
-
-export interface IClosestCornerResult {
-    readonly isBefore: boolean;
-    readonly isAfter: boolean;
-    readonly element: IClosestCornerElement;
-    readonly distance: number;
+export const bDistance = (x: number, y: number, x1: number, y1: number, x2: number, y2: number) => {
+    const dx = Math.max(x1 - x, 0, x - x2);
+    const dy = Math.max(y1 - y, 0, y - y2);
+    return Math.sqrt(dx * dx + dy * dy);
 }
