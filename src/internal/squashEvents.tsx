@@ -1,3 +1,5 @@
+import ReactDOM from "react-dom";
+
 export class SquashEvents {
     private queue: { event: { type: string; }, handle: () => void }[] = [];
     private timer: any = null;
@@ -9,7 +11,9 @@ export class SquashEvents {
                 this.timer = null;
                 const queue = this.queue;
                 this.queue = [];
-                queue.forEach((x) => x.handle());
+                ReactDOM.unstable_batchedUpdates(() => {
+                    queue.forEach((x) => x.handle());
+                });
             });
         }
     }

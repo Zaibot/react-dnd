@@ -1,9 +1,11 @@
 import React from "react";
 import { withDraggableConsumer, IDraggableContext } from "../core";
-import { IPosition } from "../utils";
+import { IPosition, DataObject, DataKey } from "../utils";
 import { SquashEvents, getEmptyImage } from "../internal";
 
 export interface IDragHandleProps {
+    readonly dataMeta?: DataObject;
+    readonly onDataMeta?: (args: { dataKey: DataKey }) => DataObject;
     readonly children?: React.ReactNode;
     readonly innerRef?: React.Ref<any>;
 }
@@ -18,6 +20,15 @@ export const DragHandle = withDraggableConsumer<IDragHandleProps>(class DragHand
                 {children}
             </div>
         );
+    }
+
+    private onDataMeta = () => {
+        if (this.props.onDataMeta) {
+            const dataKey = this.props.dataKey;
+            return this.props.onDataMeta({ dataKey });
+        }
+        const meta = this.props.dataMeta;
+        return meta;
     }
 
     private onDrag = (e: React.DragEvent<HTMLDivElement>) => {
@@ -40,8 +51,9 @@ export const DragHandle = withDraggableConsumer<IDragHandleProps>(class DragHand
             left: e.clientX,
             top: e.clientY,
         }
+        const meta = this.onDataMeta();
         this.events.push({ type: `dragstart`, position }, (ev) => [`drag`, `dragend`].includes(ev.type), ({ position }) => {
-            this.props.onDragStart({ position });
+            this.props.onDragStart({ position, dataMetaOverride: meta });
         });
     }
     private onDragEnd = (e: React.DragEvent<HTMLDivElement>) => {

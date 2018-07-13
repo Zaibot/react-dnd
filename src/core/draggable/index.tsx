@@ -2,25 +2,43 @@ import { IBounds, DataKey, DataObject, emptyBounds, IPosition, emptyPosition, is
 import React from "react";
 import { withDragAndDropData, IDraggingProviderRenderProps } from "../dragging-provider";
 
+export type DragStartHandler = (args: { position: IPosition, dataMetaOverride?: DataObject }) => void;
+export type DragHandler = (args: { position: IPosition }) => void;
+
 export interface IDraggableContext {
-    isDragging: boolean,
-    draggingPosition: IPosition | null,
-    touchPosition: IPosition,
-    dataKey: DataKey;
-    bounds: IBounds;
+    readonly bounds: IBounds;
+    readonly dataKey: DataKey;
+    readonly dataMetaOverride: DataObject | undefined;
+    readonly draggingPosition: IPosition | null,
+    readonly isDragging: boolean,
+    readonly touchPosition: IPosition,
     getData(): DataObject;
     getMeta(): DataObject;
     reportMeasured(bounds: IBounds): void;
-    onDragStart(arg: { position: IPosition }): void;
-    onDragEnd(arg: { position: IPosition }): void;
-    onDrag(arg: { position: IPosition }): void;
+    readonly onDragStart: DragStartHandler;
+    readonly onDragEnd: DragHandler;
+    readonly onDrag: DragHandler;
 }
+
+export interface IDraggableContextProps {
+    readonly bounds?: IBounds;
+    readonly dataKey: DataKey;
+    readonly dataData?: DataObject;
+    readonly dataMeta?: DataObject;
+    readonly onDataData?: (args: { dataKey: DataKey }) => DataObject;
+    readonly onDataMeta?: (args: { dataKey: DataKey }) => DataObject;
+    readonly onDragStart?: DragStartHandler;
+    readonly onDragEnd?: DragHandler;
+    readonly onDrag?: DragHandler;
+}
+
 const emptyDraggableContext: IDraggableContext = {
-    isDragging: false,
-    draggingPosition: null,
-    touchPosition: emptyPosition,
     bounds: emptyBounds,
     dataKey: null,
+    dataMetaOverride: null,
+    draggingPosition: null,
+    isDragging: false,
+    touchPosition: emptyPosition,
     getData() { },
     getMeta() { },
     reportMeasured() { },
@@ -29,17 +47,7 @@ const emptyDraggableContext: IDraggableContext = {
     onDrag() { },
 };
 const { Provider, Consumer } = React.createContext(emptyDraggableContext);
-export interface IDraggableContextProps {
-    readonly bounds?: IBounds;
-    readonly dataKey: DataKey;
-    readonly dataData?: DataObject;
-    readonly dataMeta?: DataObject;
-    readonly onDataData?: (args: { dataKey: DataKey }) => DataObject;
-    readonly onDataMeta?: (args: { dataKey: DataKey }) => DataObject;
-    readonly onDragStart?: (arg: { position: IPosition }) => void;
-    readonly onDragEnd?: (arg: { position: IPosition }) => void;
-    readonly onDrag?: (arg: { position: IPosition }) => void;
-}
+export const DraggableConsumer = Consumer;
 export const withDraggableConsumer = <P extends {}>(Component: React.ComponentType<P & IDraggableContext>): React.ComponentType<P> => {
     return (props: P) => (
         <Consumer>
@@ -49,7 +57,7 @@ export const withDraggableConsumer = <P extends {}>(Component: React.ComponentTy
 };
 export const DraggableContext = withDragAndDropData(
     class DraggableContext extends React.Component<IDraggableContextProps & IDraggingProviderRenderProps, IDraggableContext> {
-        public static getDerivedStateFromProps(nextProps: IDraggableContextProps, prevState: IDraggableContext) {
+        public static getDerivedStateFromProps(nextProps: IDraggableContextProps & IDraggingProviderRenderProps, prevState: IDraggableContext) {
             const { dataKey, bounds } = nextProps;
             if (bounds && !isBoundsSame(bounds, prevState.bounds)) {
                 return { dataKey, bounds };
@@ -59,22 +67,35 @@ export const DraggableContext = withDragAndDropData(
             }
             return null;
         }
+        private mounted = false;
+
         constructor(props: IDraggableContextProps & IDraggingProviderRenderProps, context?: any) {
             super(props, context);
 
             this.state = {
-                isDragging: false,
-                draggingPosition: null,
-                touchPosition: emptyPosition,
                 bounds: emptyBounds,
                 dataKey: props.dataKey,
+                dataMetaOverride: null,
+                draggingPosition: null,
                 getData: this.onDataData,
                 getMeta: this.onDataMeta,
-                reportMeasured: this.onMeasured,
+                isDragging: false,
                 onDrag: this.onDrag,
-                onDragStart: this.onDragStart,
                 onDragEnd: this.onDragEnd,
+                onDragStart: this.onDragStart,
+                reportMeasured: this.onMeasured,
+                touchPosition: emptyPosition,
             }
+        }
+
+        public componentDidMount() {
+            this.mounted = true;
+            this.setState({ draggingPosition: null, isDragging: false, dataMetaOverride: undefined });
+        }
+
+        public componentWillUnmount() {
+            this.mounted = false;
+            this.setState({ draggingPosition: null, isDragging: false, dataMetaOverride: undefined });
         }
 
         public render() {
@@ -96,6 +117,9 @@ export const DraggableContext = withDragAndDropData(
         }
 
         private onDataMeta = () => {
+            if (this.state.dataMetaOverride !== undefined) {
+                return this.state.dataMetaOverride;
+            }
             if (this.props.onDataMeta) {
                 const dataKey = this.props.dataKey;
                 return this.props.onDataMeta({ dataKey });
@@ -113,43 +137,49 @@ export const DraggableContext = withDragAndDropData(
             });
         }
 
-        private onDrag = (args: { position: IPosition }) => {
+        private onDrag: DragHandler = (args) => {
             const draggingPosition = args.position;
-            this.setState({ draggingPosition, isDragging: true }, () => {
-                if (this.props.onDrag) {
-                    this.props.onDrag({ position: draggingPosition });
-                }
-            });
+            if (this.mounted) {
+                this.setState({ draggingPosition, isDragging: true }, () => {
+                    if (this.props.onDrag) {
+                        this.props.onDrag({ position: draggingPosition });
+                    }
+                });
+            }
         }
 
-        private onDragStart = (args: { position: IPosition }) => {
+        private onDragStart: DragStartHandler = (args) => {
             if (isBoundsSame(this.state.bounds, emptyBounds)) {
-                console.warn(`[@zaibot/react-dnd] missing bounds on draggable`, this.props.dataKey);
+                const { dataKey, dataMeta } = this.props;
+                console.warn(`[@zaibot/react-dnd] missing bounds on draggable`, { dataKey, dataMeta });
             }
             const draggingPosition = args.position;
+            const dataMetaOverride = args.dataMetaOverride;
             const touchPosition: IPosition = {
                 left: draggingPosition.left - this.state.bounds.left,
                 top: draggingPosition.top - this.state.bounds.top,
             };
-            this.setState({ draggingPosition, touchPosition, isDragging: true }, () => {
-                const data = this.state.getData();
-                const meta = this.state.getMeta();
-                this.props.onDragging({ data, meta });
-                if (this.props.onDragStart) {
-                    this.props.onDragStart({ position: draggingPosition });
-                }
-            });
+            if (this.mounted) {
+                this.setState({ draggingPosition, touchPosition, isDragging: true, dataMetaOverride }, () => {
+                    const data = this.state.getData();
+                    const meta = this.state.getMeta();
+                    this.props.onDragStartInterface({ data, meta });
+                    if (this.props.onDragStart) {
+                        this.props.onDragStart({ position: draggingPosition, dataMetaOverride });
+                    }
+                });
+            }
         }
 
-        private onDragEnd = (args: { position: IPosition }) => {
+        private onDragEnd: DragHandler = (args) => {
             const draggingPosition = null;
-            this.setState({ draggingPosition, isDragging: false }, () => {
-                const data = this.state.getData();
-                const meta = this.state.getMeta();
-                this.props.onDragged();
-                if (this.props.onDragEnd) {
-                    this.props.onDragEnd({ position: args.position });
-                }
-            });
+            if (this.mounted) {
+                this.setState({ draggingPosition, isDragging: false, dataMetaOverride: undefined }, () => {
+                    this.props.onDragEndInterface();
+                    if (this.props.onDragEnd) {
+                        this.props.onDragEnd({ position: args.position });
+                    }
+                });
+            }
         }
     });

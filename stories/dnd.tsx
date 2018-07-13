@@ -43,9 +43,9 @@ stories
   .add(`Handle`, () => (
     <DraggingProvider>
       <Droppable onDrop={action(`onDrop`)} onDragOver={action(`onDragOver`)} onDragOut={action(`onDragOut`)}>
-        {({ isDropping, dropProps, trackingProps }) => (
+        {({ isDropping, dropProps, trackingProps, droppingMeta }) => (
           <Red {...trackingProps} {...dropProps}>
-            {isDropping ? "Dropping!" : "Waiting..."}
+            {isDropping ? `Dropping ${droppingMeta}!` : "Waiting..."}
           </Red>
         )}
       </Droppable>
@@ -54,7 +54,7 @@ stories
           <Blue><DragHandle>Handle</DragHandle> Being dragged</Blue>
         </DragLayer>
         <Measure>
-          <Yellow><DragHandle>Handle</DragHandle> Dragging me</Yellow>
+          <Yellow><DragHandle dataMeta="1">Handle 1</DragHandle> <DragHandle dataMeta="2">Handle 2</DragHandle> Dragging me</Yellow>
         </Measure>
         {/* : <Yellow {...dragContainerProps} innerRef={ref}>{dragging}<DragHandle>Handle</DragHandle> Drag me</Yellow> */}
       </DraggableContext>
