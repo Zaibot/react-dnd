@@ -1,21 +1,20 @@
 import * as React from "react";
 import { DataObject } from "../../utils";
-import { Minus } from "../../internal";
 
 export interface IDraggingInterface {
     draggingData: DataObject;
     draggingMeta: DataObject;
-    onDragging: (args: { data: DataObject, meta: DataObject }) => void;
-    onDragged: () => void;
+    onDragStartInterface: (args: { data: DataObject, meta: DataObject }) => void;
+    onDragEndInterface: () => void;
 }
 
 const context = React.createContext<IDraggingInterface>({
     draggingMeta: null,
     draggingData: null,
-    onDragging() {
+    onDragStartInterface() {
         console.warn(`[@zaibot/react-dnd] missing DraggingProvider`);
     },
-    onDragged() {
+    onDragEndInterface() {
         console.warn(`[@zaibot/react-dnd] missing DraggingProvider`);
     },
 });
@@ -23,8 +22,8 @@ const context = React.createContext<IDraggingInterface>({
 export interface IDraggingProviderRenderProps {
     draggingData: DataObject;
     draggingMeta: DataObject;
-    onDragging: (args: { data: DataObject, meta: DataObject }) => void;
-    onDragged: () => void;
+    onDragStartInterface: (args: { data: DataObject, meta: DataObject }) => void;
+    onDragEndInterface: () => void;
 }
 
 export interface IDraggingProviderProps {
@@ -40,8 +39,8 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
         this.state = {
             draggingData: null,
             draggingMeta: null,
-            onDragging: this.onDragging,
-            onDragged: this.onDragged,
+            onDragStartInterface: this.onDragging,
+            onDragEndInterface: this.onDragged,
         }
     }
 
@@ -57,22 +56,18 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
     }
 }
 
-type OmitRenderProps<P> = Minus<P, IDraggingProviderRenderProps>;
-
-export const withDragAndDropData = <P extends IDraggingProviderRenderProps>(Inner: React.ReactType<P>) => {
-    const Wrapped: React.ComponentType<OmitRenderProps<P>> = React.forwardRef(
+export const withDragAndDropData = <P extends {}>(Inner: React.ComponentType<P & IDraggingProviderRenderProps & { ref?: React.Ref<any> }>): React.ComponentType<P> => (
+    React.forwardRef(
         (props, ref) => (
             <context.Consumer>
-                {({ draggingData, draggingMeta, onDragged, onDragging }) => (
+                {({ draggingData, draggingMeta, onDragEndInterface, onDragStartInterface }) => (
                     <Inner
                         {...props}
-                        onDragging={onDragging}
-                        onDragged={onDragged}
+                        onDragStartInterface={onDragStartInterface}
+                        onDragEndInterface={onDragEndInterface}
                         draggingData={draggingData}
                         draggingMeta={draggingMeta}
                         ref={ref} />
                 )}
             </context.Consumer>
-        ));
-    return Wrapped;
-};
+        )));
