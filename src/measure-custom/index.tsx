@@ -30,30 +30,40 @@ export const MeasureCustom = withDragAndDropData(
                 bounds: emptyBounds,
             };
 
-            public static getDerivedStateFromProps(nextProps: IMeasureCustomProps & IDraggingInterface & IDraggableContext, prevState: IMeasureCustomState) {
-                const bounds = getElementBoundsOrEmpty(prevState.element);
-                nextProps.reportMeasured(bounds);
-                if (nextProps.onMeasured) {
-                    nextProps.onMeasured(bounds);
-                }
-                if (isBoundsSame(prevState.bounds, bounds)) {
-                    return null;
-                }
-                return { bounds };
+            // public static getDerivedStateFromProps(nextProps: IMeasureCustomProps & IDraggingInterface & IDraggableContext, prevState: IMeasureCustomState) {
+            //     const bounds = getElementBoundsOrEmpty(prevState.element);
+            //     nextProps.reportMeasured(bounds);
+            //     if (nextProps.onMeasured) {
+            //         nextProps.onMeasured(bounds);
+            //     }
+            //     if (isBoundsSame(prevState.bounds, bounds)) {
+            //         return null;
+            //     }
+            //     return { bounds };
+            // }
+
+            public componentWillUnmount() {
+                defaultBatchMeasure.remove(this);
+            }
+
+            public componentDidMount() {
+                this.monitorOnce();
             }
 
             public componentDidUpdate() {
-                this.monitorWhileDragging();
+                this.monitorOnce();
             }
 
             public render() {
                 return this.props.children && this.props.children({ refMeasure: this.onRef, bounds: this.state.bounds });
             }
 
-            public onRef = (el: HTMLDivElement) => {
-                this.setState({ element: el });
+            public onRef = (element: HTMLDivElement) => {
+                this.setState(({ element: oldElement }) => {
+                    return oldElement === element ? null : { element };
+                });
                 if (this.props.refInner) {
-                    this.props.refInner(el);
+                    this.props.refInner(element);
                 }
             }
 
@@ -64,11 +74,22 @@ export const MeasureCustom = withDragAndDropData(
                         if (this.props.onMeasured) {
                             this.props.onMeasured(bounds);
                         }
-                        this.setState(({ bounds: boundsOld }) => {
-                            if (isBoundsSame(boundsOld, bounds)) {
-                                return null;
-                            }
-                            return { bounds };
+                        this.setState(({ bounds: oldBounds }) => {
+                            return isBoundsSame(oldBounds, bounds) ? null : { bounds };
+                        }, this.monitorWhileDragging);
+                    });
+                }
+            }
+
+            public monitorOnce = () => {
+                if (this.state.element) {
+                    defaultBatchMeasure.push(this, this.state.element, (bounds) => {
+                        this.props.reportMeasured(bounds);
+                        if (this.props.onMeasured) {
+                            this.props.onMeasured(bounds);
+                        }
+                        this.setState(({ bounds: oldBounds }) => {
+                            return isBoundsSame(oldBounds, bounds) ? null : { bounds };
                         }, this.monitorWhileDragging);
                     });
                 }
