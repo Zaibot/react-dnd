@@ -6,9 +6,9 @@ import { SquashEvents, Minus } from "../internal";
 
 export type DroppingArgs = { droppingPosition: IPosition | null, droppingData: DataObject, droppingMeta: DataObject };
 export interface IDroppableDragProps {
-    readonly onMouseOver?: React.MouseEventHandler<AnyElement>;
-    readonly onMouseLeave?: React.MouseEventHandler<AnyElement>;
-    readonly onMouseUp?: React.MouseEventHandler<AnyElement>;
+    readonly onDragOver?: React.DragEventHandler<AnyElement>;
+    readonly onDragLeave?: React.DragEventHandler<AnyElement>;
+    readonly onDrop?: React.DragEventHandler<AnyElement>;
 }
 export interface IDroppableTrackingProps {
     readonly ref?: RefMethod;
@@ -33,16 +33,6 @@ export interface IDroppableState {
     readonly droppingMeta: DataObject;
     readonly droppingPosition: IPosition | null;
 }
-
-const mousyDragTypoish = (type: string) => {
-    switch (type) {
-        case 'mouseenter': return 'dragenter';
-        case 'mouseleave': return 'dragleave';
-        case 'mouseup': return 'drop';
-        default: return type;
-    }
-};
-
 class DroppableImpl extends React.Component<IDroppableProps & IDraggingProviderRenderProps, IDroppableState> {
     private dropping = false;
     private dropProps: IDroppableDragProps;
@@ -51,9 +41,9 @@ class DroppableImpl extends React.Component<IDroppableProps & IDraggingProviderR
     constructor(props: IDroppableProps & IDraggingProviderRenderProps, context?: any) {
         super(props, context);
         this.dropProps = {
-            onMouseUp: this.onMouseUp.bind(this),
-            onMouseOver: this.onMouseOver.bind(this),
-            onMouseLeave: this.onMouseLeave.bind(this),
+            onDrop: this.onDrop.bind(this),
+            onDragOver: this.onDragOver.bind(this),
+            onDragLeave: this.onDragLeave.bind(this),
         };
     }
 
@@ -81,8 +71,10 @@ class DroppableImpl extends React.Component<IDroppableProps & IDraggingProviderR
         return children;
     }
 
-    private onMouseOver(e: React.DragEvent<AnyElement>) {
-        this.events.push({ type: mousyDragTypoish(e.type), clientX: e.clientX, clientY: e.clientY }, (ev) => [`dragleave`, `dragover`].includes(ev.type), (ev) => {
+    private onDragOver(e: React.DragEvent<AnyElement>) {
+        e.preventDefault();
+
+        this.events.push({ type: e.type, clientX: e.clientX, clientY: e.clientY }, (ev) => [`dragleave`, `dragover`].includes(ev.type), (ev) => {
             const draggingPosition = { left: ev.clientX, top: ev.clientY };
             this.setState(({ droppingPosition, droppingData, droppingMeta }, { draggingMeta, draggingData }) => {
                 const shouldUpdate = !isPositionSame(droppingPosition, draggingPosition)
@@ -96,40 +88,33 @@ class DroppableImpl extends React.Component<IDroppableProps & IDraggingProviderR
                 }
                 return null;
             }, () => {
-                if (this.state.droppingData) {
-                    this.dropping = true;
-                    this.emitDragOver({ droppingPosition: this.state.droppingPosition, droppingData: this.state.droppingData, droppingMeta: this.state.droppingMeta });
-                }
+                this.emitDragOver({ droppingPosition: this.state.droppingPosition, droppingData: this.state.droppingData, droppingMeta: this.state.droppingMeta });
             });
         });
     }
 
-    private onMouseLeave(e: React.DragEvent<AnyElement>) {
-        this.events.push({ type: mousyDragTypoish(e.type) }, (ev) => [`dragleave`, `dragover`].includes(ev.type), (ev) => {
+    private onDragLeave(e: React.DragEvent<AnyElement>) {
+        e.preventDefault();
+
+        this.events.push({ type: e.type }, (ev) => [`dragleave`, `dragover`].includes(ev.type), (ev) => {
             const droppingData = this.state.droppingData;
             const droppingMeta = this.state.droppingMeta;
             const droppingPosition = this.state.droppingPosition;
             this.setState({ droppingData: null, droppingMeta: null, droppingPosition: null }, () => {
-                if (this.dropping) {
-                    this.dropping = false;
-                    this.emitDragOut({ droppingPosition, droppingData, droppingMeta });
-                }
+                this.emitDragOut({ droppingPosition, droppingData, droppingMeta });
             });
         });
     }
 
-    private onMouseUp(e: React.DragEvent<AnyElement>) {
+    private onDrop(e: React.DragEvent<AnyElement>) {
         e.preventDefault();
 
-        this.events.push({ type: mousyDragTypoish(e.type), clientX: e.clientX, clientY: e.clientY }, (ev) => [`dragleave`, `dragover`, `drop`].includes(ev.type), (ev) => {
+        this.events.push({ type: e.type, clientX: e.clientX, clientY: e.clientY }, (ev) => [`dragleave`, `dragover`, `drop`].includes(ev.type), (ev) => {
             const droppingData = this.state.droppingData;
             const droppingMeta = this.state.droppingMeta;
             const droppingPosition = { left: ev.clientX, top: ev.clientY };
             this.setState({ droppingData: null, droppingPosition: null }, () => {
-                if (this.dropping) {
-                    this.dropping = false;
-                    this.emitDrop({ droppingPosition, droppingData, droppingMeta });
-                }
+                this.emitDrop({ droppingPosition, droppingData, droppingMeta });
             });
         });
     }

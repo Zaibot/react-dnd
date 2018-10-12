@@ -2,6 +2,7 @@ import React from "react";
 import { withDraggableConsumer, IDraggableContext } from "../core";
 import { IPosition, DataObject, DataKey } from "../utils";
 import { SquashEvents, getEmptyImage } from "../internal";
+import { TouchAndMouseDraggable, IDragEvent } from "../draggable";
 
 export interface IDragHandleProps {
     readonly dataMeta?: DataObject;
@@ -16,9 +17,9 @@ export const DragHandle = withDraggableConsumer<IDragHandleProps>(class DragHand
     public render() {
         const { children, innerRef } = this.props;
         return (
-            <div draggable onDrag={this.onDrag} onDragStart={this.onDragStart} onDragEnd={this.onDragEnd} ref={innerRef}>
+            <TouchAndMouseDraggable onDrag={this.onDrag} onDragStart={this.onDragStart} onDragEnd={this.onDragEnd} innerRef={innerRef}>
                 {children}
-            </div>
+            </TouchAndMouseDraggable>
         );
     }
 
@@ -31,7 +32,7 @@ export const DragHandle = withDraggableConsumer<IDragHandleProps>(class DragHand
         return meta;
     }
 
-    private onDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    private onDrag = (e: IDragEvent) => {
         const position: IPosition = {
             left: e.clientX,
             top: e.clientY,
@@ -40,12 +41,12 @@ export const DragHandle = withDraggableConsumer<IDragHandleProps>(class DragHand
             this.props.onDrag({ position });
         });
     }
-    private onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    private onDragStart = (e: IDragEvent) => {
         // HTML5 dragging
-        e.dataTransfer.setDragImage(getEmptyImage(), 0, 0);
-        // TODO: implementation for setData
-        e.dataTransfer.effectAllowed = 'move';
-        e.stopPropagation();
+        // e.dataTransfer.setDragImage(getEmptyImage(), 0, 0);
+        // // TODO: implementation for setData
+        // e.dataTransfer.effectAllowed = 'move';
+        // e.stopPropagation();
 
         const position: IPosition = {
             left: e.clientX,
@@ -56,7 +57,7 @@ export const DragHandle = withDraggableConsumer<IDragHandleProps>(class DragHand
             this.props.onDragStart({ position, dataMetaOverride: meta });
         });
     }
-    private onDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    private onDragEnd = (e: IDragEvent) => {
         const position: IPosition = {
             left: e.clientX,
             top: e.clientY,
