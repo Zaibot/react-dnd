@@ -41,11 +41,15 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
             draggingMeta: null,
             onDragStartInterface: this.onDragging,
             onDragEndInterface: this.onDragged,
-        }
+        };
     }
 
     public render() {
-        return (<context.Provider value={this.state}>{this.props.children}</context.Provider>);
+        return (
+            <context.Provider value={this.state}>
+                {this.props.children}
+            </context.Provider>
+        );
     }
 
     private onDragging({ data, meta }: { data: DataObject, meta: DataObject }) {

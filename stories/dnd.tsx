@@ -11,13 +11,13 @@ const stories = storiesOf("react-dnd/Drag&Drop", module);
 
 const Red = ({ ...props }: React.HTMLProps<HTMLDivElement>) => <div
   {...props}
-  style={{ ...props.style, background: `#fcc`, display: `inline-block`, padding: `2rem` }} />;
+  style={{ ...props.style, background: `#fcc`, display: `inline-block`, padding: `2rem`, border: `1px solid #000` }} />;
 const Blue = ({ ...props }: React.HTMLProps<HTMLDivElement>) => <div
   {...props}
-  style={{ ...props.style, background: `#aaf`, display: `inline-block`, padding: `2rem`, opacity: 3 / 4 }} />;
+  style={{ ...props.style, background: `#aaf`, display: `inline-block`, padding: `2rem`, border: `1px solid #000`, opacity: 3 / 4 }} />;
 const Yellow = ({ ...props }: React.HTMLProps<HTMLDivElement>) => <div
   {...props}
-  style={{ ...props.style, background: `#ffa`, display: `inline-block`, padding: `2rem` }} />;
+  style={{ ...props.style, background: `#ffa`, display: `inline-block`, padding: `2rem`, border: `1px solid #000` }} />;
 
 
 stories
@@ -58,6 +58,42 @@ stories
         </Measure>
         {/* : <Yellow {...dragContainerProps} innerRef={ref}>{dragging}<DragHandle>Handle</DragHandle> Drag me</Yellow> */}
       </DraggableContext>
+    </DraggingProvider>
+  ))
+  .add(`Nested`, () => (
+    <DraggingProvider>
+      <DraggableContext dataKey={1} onDragEnd={action(`onDragEnd`)} onDragStart={action(`onDragStart`)}>
+        <DragLayer>
+          <Blue>Handle Being dragged</Blue>
+        </DragLayer>
+        <Measure>
+          <DragHandle dataMeta="1"><Yellow>Handle 1</Yellow></DragHandle>
+        </Measure>
+      </DraggableContext>
+      <DraggableContext dataKey={2} onDragEnd={action(`onDragEnd`)} onDragStart={action(`onDragStart`)}>
+        <DragLayer>
+          <Blue>Handle Being dragged</Blue>
+        </DragLayer>
+        <Measure>
+          <DragHandle dataMeta="2"><Yellow>Handle 2</Yellow></DragHandle>
+        </Measure>
+      </DraggableContext>
+
+      <Droppable onDrop={action(`onDrop`)} onDragOver={action(`onDragOver`)} onDragOut={action(`onDragOut`)}>
+        {({ isDropping, dropProps, trackingProps, droppingMeta }) => (
+          <Red {...trackingProps} {...dropProps}>
+            <p>{isDropping ? `Dropping 1 ${droppingMeta}!` : "Waiting 1..."}</p>
+
+            <Droppable onDrop={action(`onDrop`)} onDragOver={action(`onDragOver`)} onDragOut={action(`onDragOut`)}>
+              {({ isDropping, dropProps, trackingProps, droppingMeta }) => (
+                <Red {...trackingProps} {...dropProps}>
+                  <p>{isDropping ? `Dropping 2 ${droppingMeta}!` : "Waiting 2..."}</p>
+                </Red>
+              )}
+            </Droppable>
+          </Red>
+        )}
+      </Droppable>
     </DraggingProvider>
   ));
   // .add(`Ordering`, () => (

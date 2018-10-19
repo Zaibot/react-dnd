@@ -30,17 +30,14 @@ export const MeasureCustom = withDragAndDropData(
                 bounds: emptyBounds,
             };
 
-            // public static getDerivedStateFromProps(nextProps: IMeasureCustomProps & IDraggingInterface & IDraggableContext, prevState: IMeasureCustomState) {
-            //     const bounds = getElementBoundsOrEmpty(prevState.element);
-            //     nextProps.reportMeasured(bounds);
-            //     if (nextProps.onMeasured) {
-            //         nextProps.onMeasured(bounds);
-            //     }
-            //     if (isBoundsSame(prevState.bounds, bounds)) {
-            //         return null;
-            //     }
-            //     return { bounds };
-            // }
+            public constructor(props: IMeasureCustomProps & IDraggingInterface & IDraggableContext, context?: any) {
+                super(props, context);
+
+                this.onRef = this.onRef.bind(this);
+                this.monitorWhileDragging = this.monitorWhileDragging.bind(this);
+                this.monitorOnce = this.monitorOnce.bind(this);
+                this.onBounds = this.onBounds.bind(this);
+            }
 
             public componentWillUnmount() {
                 defaultBatchMeasure.remove(this);
@@ -58,7 +55,7 @@ export const MeasureCustom = withDragAndDropData(
                 return this.props.children && this.props.children({ refMeasure: this.onRef, bounds: this.state.bounds });
             }
 
-            public onRef = (element: HTMLDivElement) => {
+            private onRef(element: HTMLDivElement) {
                 this.setState(({ element: oldElement }) => {
                     return oldElement === element ? null : { element };
                 });
@@ -67,32 +64,26 @@ export const MeasureCustom = withDragAndDropData(
                 }
             }
 
-            public monitorWhileDragging = () => {
+            private monitorWhileDragging() {
                 if (this.props.isDragging && this.state.element) {
-                    defaultBatchMeasure.push(this, this.state.element, (bounds) => {
-                        this.props.reportMeasured(bounds);
-                        if (this.props.onMeasured) {
-                            this.props.onMeasured(bounds);
-                        }
-                        this.setState(({ bounds: oldBounds }) => {
-                            return isBoundsSame(oldBounds, bounds) ? null : { bounds };
-                        }, this.monitorWhileDragging);
-                    });
+                    defaultBatchMeasure.push(this, this.state.element, this.onBounds);
                 }
             }
 
-            public monitorOnce = () => {
+            private monitorOnce() {
                 if (this.state.element) {
-                    defaultBatchMeasure.push(this, this.state.element, (bounds) => {
-                        this.props.reportMeasured(bounds);
-                        if (this.props.onMeasured) {
-                            this.props.onMeasured(bounds);
-                        }
-                        this.setState(({ bounds: oldBounds }) => {
-                            return isBoundsSame(oldBounds, bounds) ? null : { bounds };
-                        }, this.monitorWhileDragging);
-                    });
+                    defaultBatchMeasure.push(this, this.state.element, this.onBounds);
                 }
+            }
+
+            private onBounds(bounds: IBounds) {
+                this.props.reportMeasured(bounds);
+                if (this.props.onMeasured) {
+                    this.props.onMeasured(bounds);
+                }
+                this.setState(({ bounds: oldBounds }) => {
+                    return isBoundsSame(oldBounds, bounds) ? null : { bounds };
+                }, this.monitorWhileDragging);
             }
         }));
 

@@ -29,26 +29,26 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "csstype": "^2.5.3",
-    "react": "^16.4.0"
+    "csstype": "^2.5.7",
+    "react": "^16.5.2"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^4.0.0-alpha.9",
     "@storybook/addon-storysource": "^4.0.0-alpha.9",
     "@storybook/addons": "^4.0.0-alpha.9",
     "@storybook/react": "^4.0.0-alpha.9",
-    "@types/jest": "^23.1.0",
-    "@types/react": "^16.3.16",
-    "@types/react-dom": "^16.0.6",
-    "@types/storybook__addon-actions": "^3.0.3",
-    "@types/storybook__react": "^3.0.7",
-    "awesome-typescript-loader": "^5.0.0",
+    "@types/jest": "^23.3.5",
+    "@types/react": "^16.4.18",
+    "@types/react-dom": "^16.0.9",
+    "@types/storybook__addon-actions": "^3.4.1",
+    "@types/storybook__react": "^3.0.9",
+    "awesome-typescript-loader": "^5.2.1",
     "babel-core": "^6.26.3",
     "babel-runtime": "^6.26.0",
-    "jest": "^23.1.0",
-    "react-dom": "^16.4.0",
+    "jest": "^23.6.0",
+    "react-dom": "^16.5.2",
     "rimraf": "^2.6.2",
-    "ts-jest": "^22.4.6",
-    "typescript": "^2.9.1"
+    "ts-jest": "^23.10.4",
+    "typescript": "^3.1.3"
   }
 }

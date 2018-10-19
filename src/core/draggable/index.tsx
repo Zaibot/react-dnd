@@ -2,8 +2,10 @@ import { IBounds, DataKey, DataObject, emptyBounds, IPosition, emptyPosition, is
 import React from "react";
 import { withDragAndDropData, IDraggingProviderRenderProps } from "../dragging-provider";
 
-export type DragStartHandler = (args: { position: IPosition, dataMetaOverride?: DataObject }) => void;
-export type DragHandler = (args: { position: IPosition }) => void;
+export type DragStartArgs = { position: IPosition, dataMetaOverride?: DataObject };
+export type DragArgs = { position: IPosition };
+export type DragStartHandler = (args: DragStartArgs) => void;
+export type DragHandler = (args: DragArgs) => void;
 
 export interface IDraggableContext {
     readonly bounds: IBounds;
@@ -72,6 +74,13 @@ export const DraggableContext = withDragAndDropData(
         constructor(props: IDraggableContextProps & IDraggingProviderRenderProps, context?: any) {
             super(props, context);
 
+            this.onDataData = this.onDataData.bind(this);
+            this.onDataMeta = this.onDataMeta.bind(this);
+            this.onMeasured = this.onMeasured.bind(this);
+            this.onDrag = this.onDrag.bind(this);
+            this.onDragStart = this.onDragStart.bind(this);
+            this.onDragEnd = this.onDragEnd.bind(this);
+
             this.state = {
                 bounds: emptyBounds,
                 dataKey: props.dataKey,
@@ -104,7 +113,7 @@ export const DraggableContext = withDragAndDropData(
             return (<Provider value={state}>{children}</Provider>);
         }
 
-        private onDataData = () => {
+        private onDataData() {
             if (this.props.onDataData) {
                 const dataKey = this.props.dataKey;
                 return this.props.onDataData({ dataKey });
@@ -116,7 +125,7 @@ export const DraggableContext = withDragAndDropData(
             return this.props.dataKey;
         }
 
-        private onDataMeta = () => {
+        private onDataMeta() {
             if (this.state.dataMetaOverride !== undefined) {
                 return this.state.dataMetaOverride;
             }
@@ -128,7 +137,7 @@ export const DraggableContext = withDragAndDropData(
             return meta;
         }
 
-        private onMeasured = (bounds: IBounds) => {
+        private onMeasured(bounds: IBounds) {
             this.setState(({ bounds: oldBounds }) => {
                 if (isBoundsSame(oldBounds, bounds)) {
                     return null;
@@ -137,7 +146,7 @@ export const DraggableContext = withDragAndDropData(
             });
         }
 
-        private onDrag: DragHandler = (args) => {
+        private onDrag(args: DragArgs) {
             const draggingPosition = args.position;
             if (this.mounted) {
                 this.setState({ draggingPosition, isDragging: true }, () => {
@@ -148,7 +157,7 @@ export const DraggableContext = withDragAndDropData(
             }
         }
 
-        private onDragStart: DragStartHandler = (args) => {
+        private onDragStart(args: DragStartArgs) {
             if (isBoundsSame(this.state.bounds, emptyBounds)) {
                 const { dataKey, dataMeta } = this.props;
                 console.warn(`[@zaibot/react-dnd] missing bounds on draggable`, { dataKey, dataMeta });
@@ -171,7 +180,7 @@ export const DraggableContext = withDragAndDropData(
             }
         }
 
-        private onDragEnd: DragHandler = (args) => {
+        private onDragEnd(args: DragArgs) {
             const draggingPosition = null;
             if (this.mounted) {
                 this.setState({ draggingPosition, isDragging: false, dataMetaOverride: undefined }, () => {
