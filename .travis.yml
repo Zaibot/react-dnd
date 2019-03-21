@@ -3,21 +3,21 @@ language: node_js
 node_js:
 - node
 script:
-  - npm run build
-  - npm run build-storybook
+- npm run build
+- npm run build-storybook
 deploy:
   - provider: npm
     email: tdgroen@zaibot.net
     skip_cleanup: true
     api_key:
-      secure: XUBX7GK93mPqZXtWoc3mUfW3qd3QfiqQCxDX32NE/h4H+OIctHQIstqoe9XnWDMdKQFqLVlLFnHgWafM00nb0Sa/S0vCf+nVkdbLHwRDqaoYsYDWDmzQVXC8TS+rm3TI6eWiV7dBxF5MkbJrXi4ORxU/40g6rUOiIJRIvfgOtRr1qiTc7/+38zzKSDzWn2JLd1RzoHUehasY0lDrHVSf/dcCFB2scGX6+5WtGvFAKgThn03efuRNzX8c5mIDU+18wdqntP9lht0zJxVjKjVIklg3IiYNCpCR5leWpD/w8M2zosBPh3W7XnhGVyVtsmATp3xUYVM5rljt92aIOVaBcuzUqzQU3sXRE0x26oLllMOR6Iu+0T+zkOKt+q/RDogj55x2814a5CsCaGh1PZ26Ai6Z61qmVJEh93pDNpk3Xs++t9CW5BpARHX7EG2dvp9S2hHYVRK/sJUZWH6jv+gn+BA/C7n/Towko0qW+aVm26EBXrRMo8AzLYBoBMRSiXWhpecTAOwOpUMHxyFa0LQL3FbmQvlYypCsVt0Wu99ZwYPcjVmvqkFrWcPaxST6bYMvNuZxiQ0J9U2zIGakyq/s8fJiviFRna9WRtoGeWV2/fyG+MNXFAcrx50Q/7e5mW6h8zv2PUfDliqY3O3d7Sd+Z1oZYzR3Q6FFDk1nGCms5ts=
+      secure: CrFyGO8vQ9t5170oPWf6Dv5kza7ReN5sg8c1nbqVR8fMMbg8TKH4pevTjB3zarIMyPCLCUXGLpkaly2qRPpWbVKdzxKV6RZ0tdi1nr885/95Owy6EaJ0BRiluhKEW9/uF9Ag8rqUjiYIvhzIPT+sQswzQFvfWWUUHYeyi964EWE8Kv4W0zXecFnYxAkTCtQT45omb/Wh1w9J3VcbsZHYymoxPycLs+OYWHsDVpZuNi954rtdZbMZ1C4aPeMiElbR8Yk25yHR7h/F4icGtTcXFmdMY8tD3bKUTvKhuExZIFaFYXEK8JKMcdNQ9iUeoTh7PwJ7osLYsUrlhj2aZ7Rtrpp+kWXN2GY2tpZkKss6by1/9Alwos3sq7+6VozMisCUXshx+/y5XJF+3EvepH1tsrypZ7GHITAse3cDoDE8ofqgFd9ICn1Ep3SDNRK/6a7fjl7q/UUav8poSA/jpf3bWCDoKrNZGz/b39/7QpQoMxbIveiqeLnMc4yBROplohldqSfWdacyyPcn8aifrwjz04LCZKPixn+7aXAbPKH203g/352sYGJiT40LejA2TsjnOO431vjkUupYDNdHGDO5nni9eV85p/SjbFG3X1QL6VetyO5pS4NA/EHPtz/e6NnBtUik5bJVIQqS9vCjRKFd2ivzbIlnycdlnKQ6j7A6qpc=
     on:
       tags: true
       repo: Zaibot/react-dnd
   - provider: pages
     local-dir: storybook-static
     skip-cleanup: true
-    github-token: $GITHUB_TOKEN
+    github-token: "$GITHUB_TOKEN"
     keep-history: true
     on:
       branch: master
