@@ -1,11 +1,11 @@
-import { vertical } from './vertical';
-import { horizontal } from './horizontal';
-import { all } from './all';
+import { vertical } from "./vertical";
+import { horizontal } from "./horizontal";
+import { all } from "./all";
 
 export const closestCorner = {
-    vertical,
-    horizontal,
-    all,
+  vertical,
+  horizontal,
+  all
 };
-export * from './all';
-export * from './data';
+export * from "./all";
+export * from "./data";
