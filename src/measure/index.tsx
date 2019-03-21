@@ -9,6 +9,7 @@ import { IBounds, emptyBounds, isBoundsSame, RefMethod } from "../utils";
 import { getElementBoundsOrEmpty, defaultBatchMeasure } from "../internal";
 
 export interface IMeasureProps {
+  readonly children?: React.ReactNode;
   readonly refInner?: RefMethod;
   readonly onMeasured?: (bounds: IBounds) => void;
 }
@@ -23,7 +24,7 @@ export const Measure = withDragAndDropData(
     class Measure extends React.Component<
       IMeasureProps & IDraggingInterface & IDraggableContext,
       IMeasureState
-    > {
+      > {
       public state: IMeasureState = {
         element: null,
         bounds: emptyBounds
