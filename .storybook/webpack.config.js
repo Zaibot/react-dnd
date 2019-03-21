@@ -1,6 +1,6 @@
-const path = require(`path`);
+const path = require('path');
 
-module.exports = (baseConfig, env, config) => {
+module.exports = ({ config, mode }) => {
   config.module.rules.push(
     {
       test: /\.tsx$/,
@@ -13,6 +13,8 @@ module.exports = (baseConfig, env, config) => {
       options: { parser: `typescript` },
       enforce: `pre`,
     });
+
   config.resolve.extensions.push(`.tsx`);
+
   return config;
 };

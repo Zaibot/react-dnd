@@ -10,7 +10,7 @@
   "typings": "dist/esnext/index.d.ts",
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0",
-    "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
     "clean": "rimraf dist",
     "watch": "npx nodemon -w src -e tsx -x \"npm run build:cjs && npm run build:esnext || exit 0\"",
     "build": "npm run clean && npm run build:cjs && npm run build:esnext",
@@ -29,26 +29,29 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "csstype": "^2.5.3",
-    "react": "^16.4.0"
+    "react": "^16.8.3",
+    "warning": "^4.0.3"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^4.0.0-alpha.9",
-    "@storybook/addon-storysource": "^4.0.0-alpha.9",
-    "@storybook/addons": "^4.0.0-alpha.9",
-    "@storybook/react": "^4.0.0-alpha.9",
-    "@types/jest": "^23.1.0",
-    "@types/react": "^16.3.16",
-    "@types/react-dom": "^16.0.6",
-    "@types/storybook__addon-actions": "^3.0.3",
-    "@types/storybook__react": "^3.0.7",
-    "awesome-typescript-loader": "^5.0.0",
+    "@storybook/addon-actions": "^5.0.0",
+    "@storybook/addon-links": "^5.0.0",
+    "@storybook/addon-storysource": "^5.0.0",
+    "@storybook/addons": "^5.0.0",
+    "@storybook/react": "^5.0.0",
+    "@types/jest": "^24.0.9",
+    "@types/react": "^16.8.6",
+    "@types/react-dom": "^16.8.2",
+    "@types/storybook__addon-actions": "^3.4.2",
+    "@types/storybook__react": "^4.0.1",
+    "@types/warning": "^3.0.0",
+    "awesome-typescript-loader": "^5.2.1",
     "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
     "babel-runtime": "^6.26.0",
-    "jest": "^23.1.0",
-    "react-dom": "^16.4.0",
-    "rimraf": "^2.6.2",
-    "ts-jest": "^22.4.6",
-    "typescript": "^2.9.1"
+    "jest": "^24.1.0",
+    "react-dom": "^16.8.3",
+    "rimraf": "^2.6.3",
+    "ts-jest": "^24.0.0",
+    "typescript": "^3.3.3333"
   }
 }

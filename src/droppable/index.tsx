@@ -136,13 +136,9 @@ class DroppableImpl extends React.Component<IDroppableProps & IDraggingProviderR
 }
 export const Droppable = withDragAndDropData(DroppableImpl);
 
-type OmitRenderProps<T> = Minus<T, IDroppableRenderProps>;
-type OmitChildren<T> = Minus<T, { children: IDroppableProps['children'] }>;
-
-export const withDroppable = <P extends IDroppableRenderProps>(component: React.ComponentType<P>) => {
-    const Component: any = component;
-    const Wrapped: React.ComponentType<OmitRenderProps<P> & OmitChildren<IDroppableProps>> = React.forwardRef(
-        (props, ref) => {
+export const withDroppable = <P extends {}>(Inner: React.ComponentType<P & IDroppableRenderProps>) => (
+    React.forwardRef(
+        (props: P, ref) => {
             const { onDrop, onDragOver, onDragOut, onDragMove, refDroppable, ...extraProps } = props as any /* HACK: https://github.com/Microsoft/TypeScript/issues/12520 */;
             return (
                 <Droppable
@@ -150,9 +146,7 @@ export const withDroppable = <P extends IDroppableRenderProps>(component: React.
                     onDragOver={onDragOver}
                     onDragOut={onDragOut}
                     refDroppable={refDroppable}>
-                    {(positionProps) => <Component {...positionProps} {...extraProps} ref={ref} />}
+                    {(positionProps) => <Inner {...positionProps} {...extraProps} ref={ref} />}
                 </Droppable>
             );
-        });
-    return Wrapped;
-};
+        }));

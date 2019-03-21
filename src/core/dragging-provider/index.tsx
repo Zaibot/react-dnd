@@ -56,9 +56,9 @@ export class DraggingProvider extends React.Component<IDraggingProviderProps, ID
     }
 }
 
-export const withDragAndDropData = <P extends {}>(Inner: React.ComponentType<P & IDraggingProviderRenderProps & { ref?: React.Ref<any> }>): React.ComponentType<P> => (
+export const withDragAndDropData = <P extends {}>(Inner: React.ComponentType<P & IDraggingProviderRenderProps & { ref?: React.Ref<{}> }>) => (
     React.forwardRef(
-        (props, ref) => (
+        (props: P, ref) => (
             <context.Consumer>
                 {({ draggingData, draggingMeta, onDragEndInterface, onDragStartInterface }) => (
                     <Inner
