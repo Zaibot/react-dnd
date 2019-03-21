@@ -8,14 +8,13 @@
     ],
     "jsx": "react",
     "declaration": true,
-    "declarationMap": true,
-    "experimentalDecorators": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./dist/esnext",
+    "rootDir": "./src",
+    "downlevelIteration": true,
     "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "esModuleInterop": true
   },
   "include": [
     "src"
