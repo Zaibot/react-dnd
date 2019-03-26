@@ -20,7 +20,6 @@ export type DragStartHandler = (args: {
 export type DragHandler = (args: { position: IPosition }) => void;
 
 export interface IDraggableContext {
-  readonly children?: React.ReactNode;
   readonly bounds: IBounds;
   readonly dataKey: DataKey;
   readonly dataMetaOverride: DataObject | undefined;
@@ -36,6 +35,7 @@ export interface IDraggableContext {
 }
 
 export interface IDraggableContextProps {
+  readonly children?: React.ReactNode;
   readonly bounds?: IBounds;
   readonly dataKey: DataKey;
   readonly dataData?: DataObject;
