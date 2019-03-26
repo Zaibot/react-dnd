@@ -29,9 +29,11 @@ const useDnDTargetInfo = (meta?: any): DndContextTargetInfo => {
       const cleanup = () => setSession(undefined);
       session.on(`outside`, cleanup);
       session.on(`decline`, cleanup);
+      session.on(`free`, cleanup);
       return () => {
         session.off(`outside`, cleanup);
         session.off(`decline`, cleanup);
+        session.off(`free`, cleanup);
       };
     }
   }, [session]);

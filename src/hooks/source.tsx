@@ -9,9 +9,11 @@ const useDnDSourceInfo = (data: any): DndContextItemInfo => {
 
   const begin = useCallback((interaction: Interaction) => {
     const session = dnd.begin(data, interaction);
-    session.on(`free`, () => {
+    const cleanup = () => {
+      session.off(`free`, cleanup);
       setSession(undefined);
-    });
+    };
+    session.on(`free`, cleanup);
     setSession(old => {
       if (old) {
         old.abort();

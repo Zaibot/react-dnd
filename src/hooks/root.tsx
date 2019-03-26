@@ -11,9 +11,11 @@ export const DnDContextProvider = ({
   const [session, setSession] = useState<DragSession | undefined>(undefined);
   const begin = useCallback((data: any, interaction: Interaction) => {
     const session = new DragSession(data, interaction);
-    session.on(`free`, () => {
+    const cleanup = () => {
+      session.off(`free`, cleanup);
       setSession(current => (current === session ? undefined : current));
-    });
+    };
+    session.on(`free`, cleanup);
     setSession(old => {
       if (old) {
         old.abort();
