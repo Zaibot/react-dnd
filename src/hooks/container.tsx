@@ -7,7 +7,8 @@ import React, {
 } from "react";
 import { useDnDMouseSourceHandle, useDnDMouseTargetContainer } from "./mouse";
 import { calcLayerOffsetToClient } from "./overlay";
-import { useDnDSource, DragInfo } from "./context";
+import { useDnDSource, DragInfo, CanDragSessionHandler } from "./context";
+import { DragSession } from "./DragSession";
 
 export const DnDSourceContainer = ({
   component: Component = `div` as any,
@@ -27,13 +28,15 @@ export const DnDSourceContainer = ({
 
 export const DnDTargetContainer = ({
   component: Component = `div` as any,
+  canDrop = () => true,
   children
 }: {
   component?: React.ComponentType<{ ref?: React.RefObject<any> }>;
+  canDrop?: CanDragSessionHandler,
   children: React.ReactNode;
 }) => {
   const ref = useRef<Element>();
-  const handle = useDnDMouseTargetContainer(ref);
+  const handle = useDnDMouseTargetContainer(ref, canDrop);
   return (
     <Component {...handle} ref={ref}>
       {children}
