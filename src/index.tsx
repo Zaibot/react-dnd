@@ -11,6 +11,7 @@ export * from "./utils";
 
 export * from "./hooks/container";
 export * from "./hooks/context";
+export * from "./hooks/DragSession";
 export * from "./hooks/inspector";
 export * from "./hooks/interaction";
 export * from "./hooks/measure";
