@@ -13,27 +13,18 @@ export interface MouseHandleRenderProps<T extends Element> {
 
 export const useDnDMouseSourceHandle = <T extends Element>(
   ref: React.RefObject<T | null | undefined>,
-  threshold = 10
 ): MouseHandleRenderProps<T> => {
   const { begin } = useDnDSource();
 
   const onMouseDown = useCallback(
     (e: GenericInteractionEvent) => {
-      const starting = toInteraction(ref.current, e);
-      let running = false;
       const conn = begin(toInteraction(ref.current, e));
 
       const onMouseMove = (e: GenericInteractionEvent) => {
-        running = running || (distanceInteraction(starting, toInteraction(ref.current, e)) > threshold);
-        if (running) {
-          conn.move(toInteraction(ref.current, e));
-        }
+        conn.move(toInteraction(ref.current, e));
       };
       const onMouseUp = (e: GenericInteractionEvent) => {
-        running = running || (distanceInteraction(starting, toInteraction(ref.current, e)) > threshold);
-        if (running) {
-          conn.release(toInteraction(ref.current, e));
-        }
+        conn.release(toInteraction(ref.current, e));
       };
 
       const doc = document.documentElement;
