@@ -21,7 +21,7 @@ const useDnDSourceInfo = (data: any): DndContextItemInfo => {
       return session;
     });
     return session;
-  }, []);
+  }, [data]);
 
   return { begin, data, session };
 };
