@@ -3,6 +3,10 @@ import React, { useContext, useEffect, useRef } from "react";
 import warning from "warning";
 import { DragSession } from "./DragSession";
 
+export type AcceptDragSessionHandler = (origin: Interaction) => DragSession;
+export type DeclineDragSessionHandler = (origin: Interaction) => DragSession;
+export type CanDragSessionHandler = (session: DragSession) => boolean;
+
 export interface DragInfo {
   readonly data: any;
   readonly origin: Interaction;
@@ -62,8 +66,11 @@ export const useDnDSource = () => useContext(DnDItemContext);
 export interface DndContextTargetInfo {
   readonly session?: DragSession;
   readonly meta: any;
-  readonly accept?: (origin: Interaction) => DragSession;
-  readonly decline?: (origin: Interaction) => DragSession;
+  readonly dropping?: {
+    readonly session: DragSession;
+    readonly accept: (origin: Interaction) => DragSession;
+    readonly decline: (origin: Interaction) => DragSession;
+  };
 }
 const emptyContextTarget: DndContextTargetInfo = {
   meta: null

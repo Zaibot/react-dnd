@@ -6,23 +6,21 @@ import { Interaction } from "./interaction";
 const useDnDTargetInfo = (meta?: any): DndContextTargetInfo => {
   const dnd = useDnD();
   const [session, setSession] = useState<DragSession | undefined>(undefined);
-  const accept = useMemo(() => {
-    if (dnd.session) {
-      return (interaction: Interaction) => {
-        dnd.session!.accept(meta, interaction);
-        setSession(dnd.session!);
-        return dnd.session!;
-      };
-    }
-  }, [dnd.session]);
-  const decline = useMemo(() => {
-    if (dnd.session) {
-      return (interaction: Interaction) => {
-        dnd.session!.decline(meta, interaction);
-        setSession(dnd.session!);
-        return dnd.session!;
-      };
-    }
+  const dropping = useMemo(() => {
+    const newSession = dnd.session;
+    return newSession && {
+      session: newSession,
+      accept: (interaction: Interaction) => {
+        newSession.accept(meta, interaction);
+        setSession(newSession);
+        return newSession;
+      },
+      decline: (interaction: Interaction) => {
+        newSession.decline(meta, interaction);
+        setSession(newSession);
+        return newSession;
+      },
+    };
   }, [dnd.session]);
   useEffect(() => {
     if (session) {
@@ -37,7 +35,7 @@ const useDnDTargetInfo = (meta?: any): DndContextTargetInfo => {
       };
     }
   }, [session]);
-  return { meta, session, accept, decline };
+  return { meta, session, dropping };
 };
 
 export const DnDTarget = (props: { meta?: any; children: React.ReactNode }) => {
